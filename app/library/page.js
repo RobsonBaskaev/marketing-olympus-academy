@@ -1,8 +1,10 @@
 import LibraryBrowser from "./library-browser";
+import {canonicalUrl} from "../lib/seo.mjs";
 
 export const metadata={
   title:"Библиотека методов маркетинга — Маркетинг Олимп",
   description:"Практические методы маркетинга: когда применять, пошаговый алгоритм, результат, пример и типичная ошибка.",
+  alternates:{canonical:canonicalUrl("library")},
 };
 
 export default function Library(){return <main id="main-content" className="library-page">

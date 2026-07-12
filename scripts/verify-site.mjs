@@ -4,6 +4,7 @@ import { extname, join, relative, resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
 const basePath = "/marketing-olympus-academy";
+const publicBase = "https://robsonbaskaev.github.io/marketing-olympus-academy/";
 const requiredRoutes = [
   "index.html",
   "learn/index.html",
@@ -60,6 +61,12 @@ for (const file of htmlFiles) {
   if (!/<html[^>]+lang="ru"/i.test(html)) errors.push(`${label}: не указан русский язык`);
   if (!/<title>[^<]+<\/title>/i.test(html)) errors.push(`${label}: отсутствует title`);
   if (!/<meta[^>]+name="description"/i.test(html)) errors.push(`${label}: отсутствует description`);
+  if (label !== "404.html" && label.replace(/\\/g, "/") !== "404/index.html") {
+    const route = label === "index.html" ? "" : label.replace(/index\.html$/, "");
+    const expectedCanonical = `${publicBase}${route.replace(/\\/g, "/")}`;
+    const canonical = html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i)?.[1];
+    if (canonical !== expectedCanonical) errors.push(`${label}: canonical ${canonical || "отсутствует"}, ожидался ${expectedCanonical}`);
+  }
   if (!/<main[^>]+id="main-content"/i.test(html) && label !== "404.html") {
     errors.push(`${label}: отсутствует основная область main-content`);
   }
@@ -92,6 +99,8 @@ const serviceWorker = readFileSync(join(dist, "sw.js"), "utf8");
 if (!serviceWorker.includes("fetch") || !serviceWorker.includes("caches")) {
   errors.push("sw.js: отсутствует обработка офлайн-кэша");
 }
+const sitemap = readFileSync(join(dist, "sitemap.xml"), "utf8");
+if (sitemap.includes("/backup/")) errors.push("sitemap.xml: техническая noindex-страница backup не должна индексироваться");
 
 const mainSource = readFileSync(join(root, "app", "page.js"), "utf8");
 const accessibilityCss = readFileSync(join(root, "app", "accessibility.css"), "utf8");

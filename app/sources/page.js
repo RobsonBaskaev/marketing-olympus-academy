@@ -1,6 +1,8 @@
+import {canonicalUrl} from "../lib/seo.mjs";
 export const metadata = {
   title: "Источники и редакционный стандарт — Маркетинг Олимп",
   description: "Карта открытых университетских и первичных источников, правила проверки и обновления материалов тренажёра.",
+  alternates:{canonical:canonicalUrl("sources")},
 };
 
 const sources = [

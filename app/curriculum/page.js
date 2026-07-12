@@ -1,7 +1,9 @@
+import {canonicalUrl} from "../lib/seo.mjs";
 export const metadata = {
   title: "Академическая программа маркетинга — Маркетинг Олимп",
   description:
     "Двенадцатинедельная программа: результаты обучения, кейс-семинары, практические работы, критерии оценки и открытые источники.",
+  alternates:{canonical:canonicalUrl("curriculum")},
 };
 
 const modules = [
