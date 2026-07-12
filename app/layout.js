@@ -13,6 +13,7 @@ import "./strategy.css";
 import "./acquisition.css";
 import "./analytics.css";
 import "./olympus.css";
+import "./learn.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",
