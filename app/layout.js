@@ -11,6 +11,7 @@ import "./trust.css";
 import "./research.css";
 import "./strategy.css";
 import "./acquisition.css";
+import "./analytics.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",
