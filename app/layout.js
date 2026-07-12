@@ -1,6 +1,7 @@
 import "./globals.css";
 import "./module.css";
 import "./trainer.css";
+import "./product.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",
