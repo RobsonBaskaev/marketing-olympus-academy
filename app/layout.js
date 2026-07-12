@@ -5,6 +5,7 @@ import "./product.css";
 import "./coach.css";
 import "./portfolio.css";
 import "./accessibility.css";
+import "./resources.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",

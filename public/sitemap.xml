@@ -5,4 +5,6 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url><loc>https://robsonbaskaev.github.io/marketing-olympus-academy/glossary/</loc><priority>0.8</priority></url>
+  <url><loc>https://robsonbaskaev.github.io/marketing-olympus-academy/cases/</loc><priority>0.8</priority></url>
 </urlset>
