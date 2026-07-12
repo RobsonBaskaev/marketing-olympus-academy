@@ -837,7 +837,8 @@ export default function Page() {
           <a href="olympus/">06 Олимп</a>
           <br />
           <a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> ·{" "}
-          <a href="methodology/">Методология</a> · <a href="faq/">FAQ</a>
+          <a href="methodology/">Методология</a> ·{" "}
+          <a href="sources/">Источники</a> · <a href="faq/">FAQ</a>
         </p>
         <button className="primary" onClick={() => setOpen(true)}>
           Открыть первый урок

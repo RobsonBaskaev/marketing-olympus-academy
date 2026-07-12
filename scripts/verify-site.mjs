@@ -16,6 +16,7 @@ const requiredRoutes = [
   "cases/index.html",
   "glossary/index.html",
   "methodology/index.html",
+  "sources/index.html",
   "faq/index.html"
 ];
 const requiredPublicFiles = [
