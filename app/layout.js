@@ -9,6 +9,7 @@ import "./resources.css";
 import "./lesson-enhance.css";
 import "./trust.css";
 import "./research.css";
+import "./strategy.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",
