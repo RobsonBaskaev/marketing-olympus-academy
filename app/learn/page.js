@@ -61,6 +61,7 @@ export default function Learn() {
     details: [],
     diagnostic: null,
     diagnosticHistory: [],
+    profile: null,
   });
   useEffect(() => {
     const notes = parse("olymp-answers", {}),
@@ -71,6 +72,7 @@ export default function Learn() {
       caseLab = parse("olymp-case-lab", { selected: {}, drafts: {} }),
       diagnostic = parse("olymp-diagnostic", null),
       diagnosticHistory = parse("olymp-diagnostic-history", []),
+      profile = parse("olymp-profile", null),
       cap = parse("olymp-capstone", {}),
       noteCount = Object.values(notes).filter(
         (v) => String(v || "").length >= 30,
@@ -125,6 +127,7 @@ export default function Learn() {
       diagnosticHistory: Array.isArray(diagnosticHistory)
         ? diagnosticHistory.slice(-10)
         : [],
+      profile,
     });
   }, []);
   const done = state.ready.filter(Boolean).length,
@@ -145,6 +148,15 @@ export default function Learn() {
     state.diagnosticHistory.length > 1
       ? state.diagnosticHistory[state.diagnosticHistory.length - 2]
       : null;
+  const profileGoal = {
+    career: "Начать карьеру",
+    business: "Развивать свой бизнес",
+    system: "Систематизировать опыт",
+    team: "Обучать команду",
+  }[state.profile?.goal];
+  const profilePace = { 2: "2 часа", 4: "4 часа", 6: "6 часов" }[
+    Number(state.profile?.pace || 4)
+  ];
   return (
     <main id="main-content" className="learn-page">
       <header>
@@ -163,6 +175,9 @@ export default function Learn() {
           <span>{done} из {modules.length} этапов завершено</span>
         </div>
       </header>
+      <section className="profile-summary">
+        {state.profile ? <><div><small>ВАШ РЕЖИМ ОБУЧЕНИЯ</small><h2>{state.profile.name ? `${state.profile.name}, ваш маршрут настроен` : "Маршрут настроен"}</h2><p>{profileGoal || "Персональная цель"} · {profilePace} в неделю{state.profile.project ? ` · Проект: ${state.profile.project}` : ""}</p></div><a href="../start/">Изменить план →</a></> : <><div><small>ПЕРСОНАЛЬНЫЙ ТЕМП</small><h2>Настройте план на четыре недели</h2><p>Выберите цель, реальную недельную нагрузку и проект для практики.</p></div><a className="primary" href="../start/">Настроить маршрут →</a></>}
+      </section>
       <section className="diagnostic-summary" aria-label="Результат входной диагностики">
         {diagnosticLevel ? (
           <>

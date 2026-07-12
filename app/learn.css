@@ -75,6 +75,10 @@
   justify-content: space-between;
   gap: 30px;
 }
+.profile-summary { max-width: 1150px; margin: 35px auto 0; padding: 25px 35px; background: #eef2ff; border: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 25px; }
+.profile-summary h2 { margin: 8px 0; font-size: 27px; }
+.profile-summary p { margin: 0; color: var(--muted); }
+.profile-summary > a { color: var(--ink); font-weight: 800; white-space: nowrap; }
 .diagnostic-summary h2 {
   margin: 10px 0;
   font-size: 30px;
@@ -187,6 +191,8 @@
     margin: 20px 20px 0;
     display: block;
   }
+  .profile-summary { margin: 20px 20px 0; display: block; }
+  .profile-summary > a { display: inline-block; margin-top: 18px; white-space: normal; }
   .diagnostic-summary-actions {
     align-items: flex-start;
     min-width: 0;

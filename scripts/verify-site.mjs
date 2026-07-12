@@ -10,6 +10,7 @@ const requiredRoutes = [
   "diagnostic/index.html",
   "skills/index.html",
   "review/index.html",
+  "start/index.html",
   "research/index.html",
   "strategy/index.html",
   "acquisition/index.html",
@@ -103,6 +104,7 @@ const diagnosticSource = readFileSync(join(root, "app", "diagnostic", "diagnosti
 const skillsSource = readFileSync(join(root, "app", "skills", "skills-dashboard.js"), "utf8");
 const reviewSource = readFileSync(join(root, "app", "review", "review-dashboard.js"), "utf8");
 const caseRubricSource = readFileSync(join(root, "app", "lib", "case-rubric.mjs"), "utf8");
+const startSource = readFileSync(join(root, "app", "start", "start-planner.js"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
   errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
 }
@@ -143,6 +145,15 @@ for (const marker of ["Разбор вашего решения", "Данные 
 }
 if (!learnSource.includes("evaluateCaseAnswer") || !olympusSource.includes("evaluateCaseAnswer") || !skillsSource.includes("evaluateCaseAnswer")) {
   errors.push("Единая рубрика кейсов не используется во всех отчётах прогресса");
+}
+for (const marker of ["olymp-profile", "ПЛАН НА 4 НЕДЕЛИ", "Начать карьеру", "Развивать свой бизнес", "Обучать команду"]) {
+  if (!startSource.includes(marker)) errors.push(`Персональный маршрут: отсутствует ${marker}`);
+}
+if (!backupSource.includes('"olymp-profile"') || !learnSource.includes('"olymp-profile"')) {
+  errors.push("Профиль маршрута не включён в кабинет или резервную копию");
+}
+if (!learnSource.includes('6: "6 часов"')) {
+  errors.push("Учебный кабинет: неверное склонение недельного темпа");
 }
 
 if (errors.length) {
