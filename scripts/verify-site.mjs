@@ -89,6 +89,8 @@ if (!serviceWorker.includes("fetch") || !serviceWorker.includes("caches")) {
 
 const mainSource = readFileSync(join(root, "app", "page.js"), "utf8");
 const accessibilityCss = readFileSync(join(root, "app", "accessibility.css"), "utf8");
+const caseLabSource = readFileSync(join(root, "app", "cases", "case-lab.js"), "utf8");
+const backupSource = readFileSync(join(root, "app", "backup", "page.js"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
   errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
 }
@@ -97,6 +99,12 @@ for (const selector of ["button:focus-visible", "a:focus-visible", "input:focus-
 }
 if (!/button\s*\{[^}]*min-height:\s*44px/s.test(accessibilityCss)) {
   errors.push("Доступность: минимальная высота кнопки меньше 44px");
+}
+for (const marker of ["Новичок", "Начинающий", "Уверенный", "Профессионал", "olymp-case-lab", "strong-answer"]) {
+  if (!caseLabSource.includes(marker)) errors.push(`Практикум кейсов: отсутствует ${marker}`);
+}
+if (!backupSource.includes('"olymp-case-lab"')) {
+  errors.push("Резервная копия: не включён прогресс практикума кейсов");
 }
 
 if (errors.length) {
