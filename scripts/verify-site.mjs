@@ -66,6 +66,11 @@ for (const file of htmlFiles) {
     const expectedCanonical = `${publicBase}${route.replace(/\\/g, "/")}`;
     const canonical = html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i)?.[1];
     if (canonical !== expectedCanonical) errors.push(`${label}: canonical ${canonical || "отсутствует"}, ожидался ${expectedCanonical}`);
+    const title = html.match(/<title>([^<]+)<\/title>/i)?.[1];
+    const ogTitle = html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i)?.[1];
+    const ogUrl = html.match(/<meta[^>]+property="og:url"[^>]+content="([^"]+)"/i)?.[1];
+    if (ogTitle !== title) errors.push(`${label}: og:title не совпадает с title`);
+    if (ogUrl !== expectedCanonical) errors.push(`${label}: og:url ${ogUrl || "отсутствует"}, ожидался ${expectedCanonical}`);
   }
   if (!/<main[^>]+id="main-content"/i.test(html) && label !== "404.html") {
     errors.push(`${label}: отсутствует основная область main-content`);

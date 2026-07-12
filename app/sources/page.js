@@ -1,9 +1,5 @@
-import {canonicalUrl} from "../lib/seo.mjs";
-export const metadata = {
-  title: "Источники и редакционный стандарт — Маркетинг Олимп",
-  description: "Карта открытых университетских и первичных источников, правила проверки и обновления материалов тренажёра.",
-  alternates:{canonical:canonicalUrl("sources")},
-};
+import {routeMetadata} from "../lib/seo.mjs";
+export const metadata=routeMetadata("sources","Источники и редакционный стандарт — Маркетинг Олимп","Карта открытых университетских и первичных источников, правила проверки и обновления материалов тренажёра.");
 
 const sources = [
   {area:"Фундамент маркетинга",name:"OpenStax — Principles of Marketing",owner:"Rice University / OpenStax",use:"Определения маркетинга, поведение покупателей, сегментация, выбор целевого рынка и маркетинговые исследования.",license:"Открытый учебник CC BY-NC-SA 4.0. Используем как ориентир и ссылку; не переносим текст или иллюстрации в коммерческий продукт без отдельной проверки условий.",href:"https://openstax.org/details/books/principles-marketing"},

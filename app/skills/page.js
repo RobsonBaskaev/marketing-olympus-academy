@@ -1,11 +1,7 @@
 import SkillsDashboard from "./skills-dashboard";
-import {canonicalUrl} from "../lib/seo.mjs";
+import {routeMetadata} from "../lib/seo.mjs";
 
-export const metadata = {
-  title: "Карта компетенций — Маркетинг Олимп",
-  description: "Прозрачная учебная карта маркетинговых навыков, подтверждённых выполненными работами в тренажёре.",
-  alternates:{canonical:canonicalUrl("skills")},
-};
+export const metadata=routeMetadata("skills","Карта компетенций — Маркетинг Олимп","Прозрачная учебная карта маркетинговых навыков, подтверждённых выполненными работами в тренажёре.");
 
 export default function SkillsPage() {
   return <SkillsDashboard />;

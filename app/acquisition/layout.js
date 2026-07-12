@@ -1,3 +1,3 @@
-import {canonicalUrl} from "../lib/seo.mjs";
-export const metadata={title:"Тренажёр медиаплана — Маркетинг Олимп",description:"Распределите учебный бюджет по каналам и обоснуйте медиамикс.",alternates:{canonical:canonicalUrl("acquisition")}};
+import {routeMetadata} from "../lib/seo.mjs";
+export const metadata=routeMetadata("acquisition","Тренажёр медиаплана — Маркетинг Олимп","Распределите учебный бюджет по каналам и обоснуйте медиамикс.");
 export default function Layout({children}){return children}

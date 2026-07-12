@@ -1,12 +1,7 @@
 import Diagnostic from "./diagnostic";
-import {canonicalUrl} from "../lib/seo.mjs";
+import {routeMetadata} from "../lib/seo.mjs";
 
-export const metadata = {
-  title: "Диагностика уровня маркетолога — Маркетинг Олимп",
-  description:
-    "Три мини-кейса для предварительной оценки маркетингового мышления и персональной рекомендации обучения.",
-  alternates:{canonical:canonicalUrl("diagnostic")},
-};
+export const metadata=routeMetadata("diagnostic","Диагностика уровня маркетолога — Маркетинг Олимп","Три мини-кейса для предварительной оценки маркетингового мышления и персональной рекомендации обучения.");
 
 export default function DiagnosticPage() {
   return <Diagnostic />;

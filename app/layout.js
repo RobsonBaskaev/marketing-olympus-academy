@@ -24,7 +24,7 @@ import "./library.css";
 import PWARegister from "./pwa-register";
 
 export const metadata = {
-  title: "Маркетинг: от азов до Олимпа",
+  title: "Маркетинг Олимп — тренажёр системного маркетинга",
   description: "Интерактивный тренажёр маркетинга: уроки, практические кейсы, автопроверка ответов и учебное портфолио.",
   alternates: { canonical: "https://robsonbaskaev.github.io/marketing-olympus-academy/" },
   robots: { index: true, follow: true },

@@ -1,11 +1,7 @@
 import ReviewDashboard from "./review-dashboard";
-import {canonicalUrl} from "../lib/seo.mjs";
+import {routeMetadata} from "../lib/seo.mjs";
 
-export const metadata = {
-  title: "Разбор письменных кейсов — Маркетинг Олимп",
-  description: "Прозрачная структурная проверка письменных решений маркетинговых кейсов.",
-  alternates:{canonical:canonicalUrl("review")},
-};
+export const metadata=routeMetadata("review","Разбор письменных кейсов — Маркетинг Олимп","Прозрачная структурная проверка письменных решений маркетинговых кейсов.");
 
 export default function ReviewPage() {
   return <ReviewDashboard />;

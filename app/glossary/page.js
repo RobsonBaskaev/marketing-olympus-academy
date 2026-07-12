@@ -1,4 +1,4 @@
-import {canonicalUrl} from "../lib/seo.mjs";
-export const metadata={title:"Словарь маркетолога — Маркетинг Олимп",description:"Основные термины маркетинга простыми словами.",alternates:{canonical:canonicalUrl("glossary")}};
+import {routeMetadata} from "../lib/seo.mjs";
+export const metadata=routeMetadata("glossary","Словарь маркетолога — Маркетинг Олимп","Основные термины маркетинга простыми словами.");
 const terms=[["Сегмент","Группа людей с похожей задачей, контекстом и критериями выбора."],["Гипотеза","Проверяемое предположение о причине или решении."],["Ценность","Полезный результат, ради которого клиент выбирает продукт."],["Позиционирование","Место продукта в сознании аудитории относительно альтернатив."],["Конверсия","Доля людей, совершивших нужное действие."],["Метрика","Измеримый показатель результата."],["Удержание","Способность продукта возвращать пользователей."],["Инсайт","Неочевидное понимание мотива клиента."]];
 export default function Glossary(){return <main id="main-content" className="knowledge-page"><a className="back-home" href="../">← На главную</a><small>БАЗА ЗНАНИЙ</small><h1>Словарь маркетолога</h1><p className="lead">Короткие определения без профессионального тумана.</p><section className="term-grid">{terms.map(([x,y])=><article key={x}><h2>{x}</h2><p>{y}</p></article>)}</section></main>}
