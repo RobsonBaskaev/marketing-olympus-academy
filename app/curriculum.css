@@ -1,0 +1,46 @@
+.curriculum-page { min-height: 100vh; background: #f7f5ee; }
+.curriculum-page > header { padding: 55px 7vw 75px; background: #111820; color: white; }
+.curriculum-page > header > a { color: white; }
+.curriculum-page > header small { display: block; margin-top: 38px; }
+.curriculum-page h1 { max-width: 1000px; font-size: clamp(50px, 7vw, 88px); letter-spacing: -.06em; line-height: 1; margin: 18px 0; }
+.curriculum-page > header p { max-width: 790px; color: #b7c0c8; line-height: 1.7; }
+.curriculum-facts { display: flex; gap: 55px; margin-top: 38px; }
+.curriculum-facts > div { display: flex; flex-direction: column; }
+.curriculum-facts b { color: #d9ff43; font-size: 34px; }
+.curriculum-facts span { font-size: 10px; text-transform: uppercase; }
+.course-outcomes { max-width: 1100px; margin: 65px auto; padding: 0 5vw; }
+.course-outcomes h2, .assessment-model > h2 { font-size: clamp(34px, 5vw, 54px); letter-spacing: -.04em; }
+.course-outcomes ol { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; counter-reset: outcomes; padding: 0; list-style: none; }
+.course-outcomes li { padding: 22px; background: white; border: 1px solid var(--line); line-height: 1.6; counter-increment: outcomes; }
+.course-outcomes li:before { content: "0" counter(outcomes); display: block; margin-bottom: 18px; color: var(--muted); font-size: 11px; }
+.academic-rhythm { padding: 36px 6vw; background: #d9ff43; }
+.academic-rhythm > div { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; margin-top: 20px; }
+.academic-rhythm span { padding: 18px; border-left: 1px solid #9eaf38; font-weight: 800; font-size: 12px; }
+.curriculum-modules { max-width: 1250px; margin: 70px auto; padding: 0 4vw; }
+.curriculum-modules > article { display: grid; grid-template-columns: 130px 1fr 300px; border-top: 1px solid var(--line); padding: 40px 0; gap: 35px; }
+.module-index span { display: block; font-size: 38px; }
+.module-index small { color: var(--muted); }
+.module-syllabus h2 { font-size: 34px; margin-top: 0; }
+.module-syllabus h3, .curriculum-modules aside h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+.module-syllabus li { margin: 10px 0; line-height: 1.55; }
+.seminar-box, .deliverable-box { margin-top: 18px; padding: 16px 18px; background: white; border-left: 4px solid #111820; }
+.deliverable-box { background: #f0f5dd; border-left-color: #8da218; }
+.seminar-box p, .deliverable-box p { margin-bottom: 0; line-height: 1.55; }
+.curriculum-modules aside { padding: 24px; background: #111820; color: white; align-self: start; }
+.curriculum-modules aside a { display: block; color: #d9ff43; padding: 13px 0; border-top: 1px solid #38424c; font-size: 12px; line-height: 1.5; }
+.assessment-model { padding: 70px 6vw; background: #ece9e1; }
+.assessment-model > div { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 35px; }
+.assessment-model article { padding: 25px; border: 1px solid var(--line); background: white; }
+.assessment-model article > b { font-size: 30px; color: #63730f; }
+.assessment-model article p { color: var(--muted); font-size: 12px; line-height: 1.55; }
+.assessment-note { max-width: 850px; margin-top: 30px; color: var(--muted); line-height: 1.65; }
+.level-paths { display: grid; grid-template-columns: 1fr 1fr; max-width: 1100px; margin: 65px auto; }
+.level-paths > div { padding: 40px; border: 1px solid var(--line); }
+.level-paths > div:last-child { background: #111820; color: white; }
+.level-paths p { color: var(--muted); line-height: 1.65; }
+.level-paths > div:last-child p { color: #b7c0c8; }
+.academic-integrity { max-width: 1000px; margin: 0 auto 80px; padding: 45px; background: white; border: 1px solid var(--line); }
+.academic-integrity li { margin: 13px 0; line-height: 1.55; }
+.academic-integrity a { display: inline-block; margin-top: 18px; color: var(--ink); font-weight: 800; }
+@media (max-width: 900px) { .academic-rhythm > div { grid-template-columns: 1fr; } .academic-rhythm span { border-left: 0; border-top: 1px solid #9eaf38; } .curriculum-modules > article { grid-template-columns: 80px 1fr; } .curriculum-modules aside { grid-column: 2; } .assessment-model > div { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 650px) { .course-outcomes ol, .level-paths { grid-template-columns: 1fr; } .curriculum-modules > article { grid-template-columns: 1fr; } .curriculum-modules aside { grid-column: auto; } .assessment-model > div { grid-template-columns: 1fr; } .curriculum-facts { gap: 25px; } }

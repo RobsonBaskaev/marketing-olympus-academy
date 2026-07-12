@@ -1,5 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import {
+  MIN_LESSON_ANSWER,
+  nextIncompleteLesson,
+  reconcileCompletedLessons,
+} from "./lib/lesson-progress.mjs";
 
 const lessons = [
   {
@@ -57,6 +62,14 @@ const lessons = [
     ],
     task: "Назовите главную альтернативу и одно отличие, которое клиент может проверить.",
   },
+];
+const routeModules = [
+  { name: "Фундамент", href: "#module" },
+  { name: "Исследования", href: "research/" },
+  { name: "Стратегия", href: "strategy/" },
+  { name: "Привлечение", href: "acquisition/" },
+  { name: "Аналитика", href: "analytics/" },
+  { name: "Олимп", href: "olympus/" },
 ];
 const cases = [
   {
@@ -594,8 +607,22 @@ export default function Page() {
     [answers, setAnswers] = useState([]);
   useEffect(() => {
     try {
-      setDone(JSON.parse(localStorage.getItem("olymp-progress") || "[]"));
-      setNotes(JSON.parse(localStorage.getItem("olymp-answers") || "{}"));
+      const savedDone = JSON.parse(
+          localStorage.getItem("olymp-progress") || "[]",
+        ),
+        savedNotes = JSON.parse(
+          localStorage.getItem("olymp-answers") || "{}",
+        ),
+        validDone = reconcileCompletedLessons(
+          savedDone,
+          savedNotes,
+          lessons.length,
+        );
+      setDone(validDone);
+      setNotes(savedNotes);
+      if (JSON.stringify(validDone) !== JSON.stringify(savedDone)) {
+        localStorage.setItem("olymp-progress", JSON.stringify(validDone));
+      }
       setMode(localStorage.getItem("olymp-mode") || "beginner");
     } catch {}
   }, []);
@@ -638,10 +665,15 @@ export default function Page() {
     const next = { ...notes, [lesson]: value };
     setNotes(next);
     localStorage.setItem("olymp-answers", JSON.stringify(next));
+    const validDone = reconcileCompletedLessons(done, next, lessons.length);
+    if (validDone.length !== done.length) {
+      setDone(validDone);
+      localStorage.setItem("olymp-progress", JSON.stringify(validDone));
+    }
     setError("");
   };
   const finish = () => {
-    if ((notes[lesson] || "").trim().length < 30) {
+    if ((notes[lesson] || "").trim().length < MIN_LESSON_ANSWER) {
       setError(
         "Добавьте осмысленный ответ — минимум 30 символов. Работа сохранится автоматически.",
       );
@@ -656,6 +688,12 @@ export default function Page() {
   const chooseMode = (value) => {
     setMode(value);
     localStorage.setItem("olymp-mode", value);
+  };
+  const openRecommendedLesson = () => {
+    setLesson(nextIncompleteLesson(done, lessons.length));
+    setQuiz(null);
+    setError("");
+    setOpen(true);
   };
   return (
     <main id="main-content">
@@ -687,8 +725,12 @@ export default function Page() {
           <a className="primary" href="diagnostic/">
             Определить мой уровень
           </a>
-          <button className="primary" onClick={() => setOpen(true)}>
-            Начать учиться <b>↗</b>
+          <button className="primary" onClick={openRecommendedLesson}>
+            {done.length === lessons.length
+              ? "Повторить модуль"
+              : done.length
+                ? "Продолжить обучение"
+                : "Начать учиться"} <b>↗</b>
           </button>
           <a href="#module">Посмотреть модуль ↓</a>
         </div>
@@ -740,13 +782,19 @@ export default function Page() {
               <span>{progress}%</span>
             </div>
             <h3>
-              {done.length
-                ? "Продолжайте с места остановки"
-                : "Начните с основ"}
+              {done.length === lessons.length
+                ? "Фундамент завершён"
+                : done.length
+                  ? "Продолжайте с места остановки"
+                  : "Начните с основ"}
             </h3>
             <p>{done.length} из 5 уроков завершено</p>
-            <button className="primary" onClick={() => setOpen(true)}>
-              {done.length ? "Продолжить →" : "Начать модуль →"}
+            <button className="primary" onClick={openRecommendedLesson}>
+              {done.length === lessons.length
+                ? "Повторить уроки →"
+                : done.length
+                  ? "Продолжить →"
+                  : "Начать модуль →"}
             </button>
           </div>
           <div className="lesson-list">
@@ -784,21 +832,14 @@ export default function Page() {
           </p>
         </div>
         <div className="trackgrid">
-          {[
-            "Фундамент",
-            "Исследования",
-            "Стратегия",
-            "Привлечение",
-            "Аналитика",
-            "Олимп",
-          ].map((x, i) => (
-            <article key={x}>
+          {routeModules.map((item, i) => (
+            <a className="track-card" href={item.href} key={item.name}>
               <span>0{i + 1}</span>
               <div className="mount">{i ? "◇" : "▲"}</div>
-              <h3>{x}</h3>
+              <h3>{item.name}</h3>
               <p>Доступен сейчас</p>
-              <b>ОТКРЫТ</b>
-            </article>
+              <b>ОТКРЫТЬ →</b>
+            </a>
           ))}
         </div>
       </section>
@@ -817,7 +858,9 @@ export default function Page() {
             <b>В ПОРТФОЛИО</b>
           </div>
           <h3>Карта ценности продукта</h3>
-          <button onClick={() => setOpen(true)}>Начать работу →</button>
+          <button onClick={openRecommendedLesson}>
+            {done.length ? "Продолжить работу →" : "Начать работу →"}
+          </button>
         </div>
       </section>
       <LearningSetup mode={mode} onMode={chooseMode} notes={notes} />
@@ -833,6 +876,12 @@ export default function Page() {
             <b>Учебный кабинет</b>
           </a>{" "}
           · <a href="backup/">Резервная копия</a> ·{" "}
+          <a href="start/">Персональный план</a> ·{" "}
+          <a href="diagnostic/">Диагностика</a> ·{" "}
+          <a href="skills/">Компетенции</a> ·{" "}
+          <a href="review/">Разбор кейса</a> ·{" "}
+          <a href="curriculum/">Академическая программа</a>
+          <br />
           <a href="research/">02 Исследования</a> ·{" "}
           <a href="strategy/">03 Стратегия</a> ·{" "}
           <a href="acquisition/">04 Привлечение</a> ·{" "}
@@ -843,8 +892,8 @@ export default function Page() {
           <a href="methodology/">Методология</a> ·{" "}
           <a href="sources/">Источники</a> · <a href="faq/">FAQ</a>
         </p>
-        <button className="primary" onClick={() => setOpen(true)}>
-          Открыть первый урок
+        <button className="primary" onClick={openRecommendedLesson}>
+          {done.length ? "Продолжить обучение" : "Открыть первый урок"}
         </button>
       </footer>
       {open && (
@@ -881,9 +930,13 @@ export default function Page() {
             ))}
             <button
               className={`side-lesson ${quiz !== null ? "active" : ""}`}
+              disabled={done.length < lessons.length}
               onClick={() => setQuiz(0)}
             >
-              <span>★</span>Итоговый тест
+              <span>★</span>
+              {done.length < lessons.length
+                ? "Итоговый тест · после 5 работ"
+                : "Итоговый тест"}
             </button>
           </aside>
           <section className="lesson-page">

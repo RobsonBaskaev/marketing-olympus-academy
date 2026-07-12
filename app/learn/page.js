@@ -220,6 +220,7 @@ export default function Learn() {
         <div className="skills-entry-actions">
           <a href="../skills/">Открыть карту компетенций →</a>
           <a href="../review/">Разобрать письменный кейс</a>
+          <a href="../curriculum/">Академическая программа</a>
         </div>
       </section>
       <section className="next-step">

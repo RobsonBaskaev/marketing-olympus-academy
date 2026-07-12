@@ -7,7 +7,9 @@
     "build": "next build",
     "verify": "node scripts/verify-site.mjs",
     "test:rubric": "node scripts/test-case-rubric.mjs",
-    "check": "pnpm build && pnpm verify && pnpm test:rubric",
+    "test:progress": "node scripts/test-lesson-progress.mjs",
+    "test:analytics": "node scripts/test-analytics-validation.mjs",
+    "check": "pnpm build && pnpm verify && pnpm test:rubric && pnpm test:progress && pnpm test:analytics",
     "start": "next start"
   },
   "dependencies": {

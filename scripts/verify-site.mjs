@@ -11,6 +11,7 @@ const requiredRoutes = [
   "skills/index.html",
   "review/index.html",
   "start/index.html",
+  "curriculum/index.html",
   "research/index.html",
   "strategy/index.html",
   "acquisition/index.html",
@@ -105,14 +106,46 @@ const skillsSource = readFileSync(join(root, "app", "skills", "skills-dashboard.
 const reviewSource = readFileSync(join(root, "app", "review", "review-dashboard.js"), "utf8");
 const caseRubricSource = readFileSync(join(root, "app", "lib", "case-rubric.mjs"), "utf8");
 const startSource = readFileSync(join(root, "app", "start", "start-planner.js"), "utf8");
+const curriculumSource = readFileSync(join(root, "app", "curriculum", "page.js"), "utf8");
+const sourcesSource = readFileSync(join(root, "app", "sources", "page.js"), "utf8");
+const pagesWorkflow = readFileSync(join(root, ".github", "workflows", "pages.yml"), "utf8");
+const lessonProgressSource = readFileSync(join(root, "app", "lib", "lesson-progress.mjs"), "utf8");
+const strategySource = readFileSync(join(root, "app", "strategy", "page.js"), "utf8");
+const acquisitionSource = readFileSync(join(root, "app", "acquisition", "page.js"), "utf8");
+const analyticsSource = readFileSync(join(root, "app", "analytics", "page.js"), "utf8");
+const analyticsValidationSource = readFileSync(join(root, "app", "lib", "analytics-validation.mjs"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
   errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
+}
+for (const marker of ["reconcileCompletedLessons", "nextIncompleteLesson", "MIN_LESSON_ANSWER"]) {
+  if (!mainSource.includes(marker) || !lessonProgressSource.includes(marker)) {
+    errors.push(`Прогресс уроков: отсутствует ${marker}`);
+  }
+}
+for (const marker of ['href="research/"', 'href="strategy/"', 'href="acquisition/"', 'href="analytics/"', 'href="olympus/"', 'className="track-card"']) {
+  if (!mainSource.includes(marker)) errors.push(`Главная траектория: отсутствует ${marker}`);
+}
+if (!mainSource.includes("disabled={done.length < lessons.length}")) {
+  errors.push("Итоговый тест не заблокирован до завершения пяти работ");
+}
+for (const [label, source] of [["Стратегия", strategySource], ["Медиаплан", acquisitionSource]]) {
+  for (const marker of ["evaluateCaseAnswer", "rationaleStrong", "quality-feedback"]) {
+    if (!source.includes(marker)) errors.push(`${label}: отсутствует доказательная проверка ${marker}`);
+  }
+}
+for (const marker of ["validateFunnel", "dataErrors", "Атрибутированная выручка", "Расчёт нельзя интерпретировать"]) {
+  if (!analyticsSource.includes(marker) && !analyticsValidationSource.includes(marker)) {
+    errors.push(`Аналитика: отсутствует ${marker}`);
+  }
 }
 for (const selector of ["button:focus-visible", "a:focus-visible", "input:focus-visible", "textarea:focus-visible", "summary:focus-visible"]) {
   if (!accessibilityCss.includes(selector)) errors.push(`Доступность: отсутствует стиль ${selector}`);
 }
 if (!/button\s*\{[^}]*min-height:\s*44px/s.test(accessibilityCss)) {
   errors.push("Доступность: минимальная высота кнопки меньше 44px");
+}
+if (!/\.actions a\.primary\s*\{[^}]*color:\s*white/s.test(readFileSync(join(root, "app", "globals.css"), "utf8"))) {
+  errors.push("Главная: текст основной ссылки hero не контрастен");
 }
 for (const marker of ["Новичок", "Начинающий", "Уверенный", "Профессионал", "olymp-case-lab", "strong-answer"]) {
   if (!caseLabSource.includes(marker)) errors.push(`Практикум кейсов: отсутствует ${marker}`);
@@ -154,6 +187,15 @@ if (!backupSource.includes('"olymp-profile"') || !learnSource.includes('"olymp-p
 }
 if (!learnSource.includes('6: "6 часов"')) {
   errors.push("Учебный кабинет: неверное склонение недельного темпа");
+}
+for (const marker of ["12", "РЕЗУЛЬТАТЫ ПРОГРАММЫ", "Кейс-семинар", "РЕКОМЕНДУЕМАЯ МОДЕЛЬ ОЦЕНКИ", "Академическая и продуктовая честность", "MIT OCW", "OpenStax"]) {
+  if (!curriculumSource.includes(marker)) errors.push(`Академическая программа: отсутствует ${marker}`);
+}
+for (const marker of ["Marketing Management: Analytics, Frameworks, and Applications", "New Enterprises", "Marketing Strategy"]) {
+  if (!sourcesSource.includes(marker)) errors.push(`Карта источников: отсутствует ${marker}`);
+}
+for (const marker of ["actions/checkout@v6", "pnpm/action-setup@v6", "actions/setup-node@v6", "node-version: 24"]) {
+  if (!pagesWorkflow.includes(marker)) errors.push(`GitHub Pages workflow: отсутствует ${marker}`);
 }
 
 if (errors.length) {
