@@ -93,6 +93,9 @@ const accessibilityCss = readFileSync(join(root, "app", "accessibility.css"), "u
 const caseLabSource = readFileSync(join(root, "app", "cases", "case-lab.js"), "utf8");
 const backupSource = readFileSync(join(root, "app", "backup", "page.js"), "utf8");
 const learnSource = readFileSync(join(root, "app", "learn", "page.js"), "utf8");
+for (const marker of ["olymp-diagnostic", "Результат входной диагностики", "Пройти диагностику"]) {
+  if (!learnSource.includes(marker)) errors.push(`Учебный кабинет: отсутствует ${marker}`);
+}
 const olympusSource = readFileSync(join(root, "app", "olympus", "page.js"), "utf8");
 const diagnosticSource = readFileSync(join(root, "app", "diagnostic", "diagnostic.js"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {

@@ -54,7 +54,12 @@ const modules = [
 ];
 
 export default function Learn() {
-  const [state, setState] = useState({ loaded: false, ready: [], details: [] });
+  const [state, setState] = useState({
+    loaded: false,
+    ready: [],
+    details: [],
+    diagnostic: null,
+  });
   useEffect(() => {
     const notes = parse("olymp-answers", {}),
       research = parse("olymp-research", {}),
@@ -62,6 +67,7 @@ export default function Learn() {
       acq = parse("olymp-acquisition", {}),
       analytics = parse("olymp-analytics", {}),
       caseLab = parse("olymp-case-lab", { selected: {}, drafts: {} }),
+      diagnostic = parse("olymp-diagnostic", null),
       cap = parse("olymp-capstone", {}),
       noteCount = Object.values(notes).filter(
         (v) => String(v || "").length >= 30,
@@ -106,6 +112,10 @@ export default function Learn() {
         `${caseCount}/4 кейса завершено`,
         `${capCount}/3 ответов защиты`,
       ],
+      diagnostic:
+        diagnostic?.finished && Number.isFinite(Number(diagnostic.score))
+          ? diagnostic
+          : null,
     });
   }, []);
   const done = state.ready.filter(Boolean).length,
@@ -115,6 +125,13 @@ export default function Learn() {
       state.ready.findIndex((x) => !x),
     ),
     recommended = state.ready.every(Boolean) ? modules.length - 1 : next;
+  const diagnosticLevel = state.diagnostic
+    ? state.diagnostic.score <= 2
+      ? { name: "Новичок", route: "Начните с фундамента", href: "../#module" }
+      : state.diagnostic.score <= 4
+        ? { name: "Практик", route: "Продолжите с исследований", href: "../research/" }
+        : { name: "Системный маркетолог", route: "Переходите к стратегии", href: "../strategy/" }
+    : null;
   return (
     <main id="main-content" className="learn-page">
       <header>
@@ -133,6 +150,35 @@ export default function Learn() {
           <span>{done} из {modules.length} этапов завершено</span>
         </div>
       </header>
+      <section className="diagnostic-summary" aria-label="Результат входной диагностики">
+        {diagnosticLevel ? (
+          <>
+            <div>
+              <small>ВАША СТАРТОВАЯ ТОЧКА</small>
+              <h2>{diagnosticLevel.name}</h2>
+              <p>
+                {state.diagnostic.score}/6 баллов · {diagnosticLevel.route}. Результат
+                предварительный и уточняется по практическим работам.
+              </p>
+            </div>
+            <div className="diagnostic-summary-actions">
+              <a href={diagnosticLevel.href}>Открыть рекомендованный модуль →</a>
+              <a href="../diagnostic/">Посмотреть разбор</a>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <small>ПЕРСОНАЛЬНЫЙ СТАРТ</small>
+              <h2>Определите свой уровень</h2>
+              <p>Три коротких кейса помогут выбрать подходящую точку входа в обучение.</p>
+            </div>
+            <a className="primary" href="../diagnostic/">
+              Пройти диагностику →
+            </a>
+          </>
+        )}
+      </section>
       <section className="next-step">
         <div>
           <small>РЕКОМЕНДУЕМЫЙ ШАГ</small>
