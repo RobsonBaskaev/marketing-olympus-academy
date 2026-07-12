@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "verify": "node scripts/verify-site.mjs",
-    "check": "pnpm build && pnpm verify",
+    "test:rubric": "node scripts/test-case-rubric.mjs",
+    "check": "pnpm build && pnpm verify && pnpm test:rubric",
     "start": "next start"
   },
   "dependencies": {

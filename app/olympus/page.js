@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
 
 const safeParse = (key, fallback) => {
   try {
@@ -57,6 +58,9 @@ export default function Olympus() {
       artifacts.analytics.data && Number(artifacts.analytics.data.sales) > 0,
     caseCount = Object.keys(artifacts.caseLab.selected || {}).filter(
       (id) => String(artifacts.caseLab.drafts?.[id] || "").trim().length >= 80,
+    ).length,
+    strongCaseCount = Object.keys(artifacts.caseLab.drafts || {}).filter(
+      (id) => evaluateCaseAnswer(artifacts.caseLab.drafts[id]).ready && evaluateCaseAnswer(artifacts.caseLab.drafts[id]).score >= 4,
     ).length;
   const modules = [
       {
@@ -94,8 +98,8 @@ export default function Olympus() {
       {
         n: "P",
         name: "Практикум кейсов",
-        ready: caseCount >= 1,
-        detail: `${caseCount}/4 кейса завершено`,
+        ready: strongCaseCount >= 1,
+        detail: `${strongCaseCount}/4 кейса подтверждено структурой`,
       },
     ],
     readyCount = modules.filter((x) => x.ready).length,
@@ -125,7 +129,7 @@ export default function Olympus() {
         `Стратегия: ${strategyReady ? "собрана" : "не завершена"}`,
         `Медиаплан: ${acqReady ? "собран" : "не завершён"}`,
         `Аналитика: ${analyticsReady ? "собрана" : "не завершена"}`,
-        `Практикум: ${caseCount}/4 кейса`,
+        `Практикум: ${strongCaseCount}/4 структурных кейса (${caseCount}/4 написано)`,
         "",
         "Черновые данные проекта",
         JSON.stringify(artifacts, null, 2),

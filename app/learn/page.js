@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
 
 const parse = (key, fallback) => {
   try {
@@ -87,6 +88,9 @@ export default function Learn() {
       caseCount = Object.keys(caseLab.selected || {}).filter(
         (id) => String(caseLab.drafts?.[id] || "").trim().length >= 80,
       ).length,
+      strongCaseCount = Object.keys(caseLab.drafts || {}).filter(
+        (id) => evaluateCaseAnswer(caseLab.drafts[id]).ready && evaluateCaseAnswer(caseLab.drafts[id]).score >= 4,
+      ).length,
       capCount = [
         cap.summary?.length >= 180,
         cap.risk?.length >= 80,
@@ -100,7 +104,7 @@ export default function Learn() {
         strategyCount === 4,
         acqBudget === 300000,
         analyticsReady,
-        caseCount >= 1,
+        strongCaseCount >= 1,
         capCount === 3,
       ],
       details: [
@@ -111,7 +115,7 @@ export default function Learn() {
           ? `${acqBudget.toLocaleString("ru-RU")} ₽ распределено`
           : "Нет медиаплана",
         analyticsReady ? "Воронка сохранена" : "Нет данных",
-        `${caseCount}/4 кейса завершено`,
+        `${strongCaseCount}/4 кейса подтверждено структурой · ${caseCount}/4 написано`,
         `${capCount}/3 ответов защиты`,
       ],
       diagnostic:

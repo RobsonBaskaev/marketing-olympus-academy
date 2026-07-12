@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
 
 const read = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key) || "null") || fallback; }
@@ -19,7 +20,8 @@ export default function SkillsDashboard() {
       strategyChoices = (strategy.answers || []).filter((v) => v !== null && v !== undefined).length,
       budget = acquisition.money ? Object.values(acquisition.money).reduce((sum, v) => sum + Number(v || 0), 0) : 0,
       analyticsReady = Number(analytics.data?.sales || 0) > 0,
-      completedCases = Object.keys(caseLab.selected || {}).filter((id) => String(caseLab.drafts?.[id] || "").trim().length >= 80).length,
+      writtenCases = Object.keys(caseLab.drafts || {}).filter((id) => evaluateCaseAnswer(caseLab.drafts[id]).ready).length,
+      strongCases = Object.keys(caseLab.drafts || {}).filter((id) => evaluateCaseAnswer(caseLab.drafts[id]).ready && evaluateCaseAnswer(caseLab.drafts[id]).score >= 4).length,
       capstoneCount = [capstone.summary?.length >= 180, capstone.risk?.length >= 80, capstone.experiment?.length >= 120].filter(Boolean).length;
     setSkills([
       { name: "Клиент и проблема", score: answerCount >= 3 ? 2 : answerCount ? 1 : 0, evidence: `${answerCount}/5 учебных работ`, next: "Опишите клиента, его задачу и наблюдаемый барьер.", href: "../#module" },
@@ -27,7 +29,7 @@ export default function SkillsDashboard() {
       { name: "Стратегическая связность", score: strategyChoices === 4 && String(strategy.why || "").length >= 100 ? 2 : strategyChoices >= 2 ? 1 : 0, evidence: `${strategyChoices}/4 решений · обоснование ${String(strategy.why || "").length}/100`, next: "Свяжите сегмент, ценность, канал и бизнес-метрику.", href: "../strategy/" },
       { name: "Привлечение и бюджет", score: budget === 300000 && String(acquisition.reason || "").length >= 100 ? 2 : budget > 0 ? 1 : 0, evidence: `${budget.toLocaleString("ru-RU")} ₽ · обоснование ${String(acquisition.reason || "").length}/100`, next: "Соберите медиамикс под цель и объясните ограничения модели.", href: "../acquisition/" },
       { name: "Маркетинговая аналитика", score: analyticsReady ? 2 : Object.keys(analytics.data || {}).length ? 1 : 0, evidence: analyticsReady ? "Воронка рассчитана" : "Нет полной воронки", next: "Введите данные воронки и найдите главное узкое место.", href: "../analytics/" },
-      { name: "Решение кейсов", score: completedCases >= 3 ? 2 : completedCases ? 1 : 0, evidence: `${completedCases}/4 кейса с письменным решением`, next: "Обоснуйте действие через данные, гипотезу, метрику и риск.", href: "../cases/" },
+      { name: "Решение кейсов", score: strongCases >= 3 ? 2 : writtenCases ? 1 : 0, evidence: `${strongCases}/4 структурных разбора · ${writtenCases}/4 письменных ответа`, next: "Обоснуйте действие через данные, гипотезу, метрику и риск.", href: writtenCases ? "../review/" : "../cases/" },
       { name: "Защита проекта", score: capstoneCount === 3 ? 2 : capstoneCount ? 1 : 0, evidence: `${capstoneCount}/3 элементов защиты`, next: "Соберите вывод, главный риск и следующий эксперимент.", href: "../olympus/" },
     ]);
   }, []);

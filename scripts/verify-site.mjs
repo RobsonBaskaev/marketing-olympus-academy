@@ -102,6 +102,7 @@ const olympusSource = readFileSync(join(root, "app", "olympus", "page.js"), "utf
 const diagnosticSource = readFileSync(join(root, "app", "diagnostic", "diagnostic.js"), "utf8");
 const skillsSource = readFileSync(join(root, "app", "skills", "skills-dashboard.js"), "utf8");
 const reviewSource = readFileSync(join(root, "app", "review", "review-dashboard.js"), "utf8");
+const caseRubricSource = readFileSync(join(root, "app", "lib", "case-rubric.mjs"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
   errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
 }
@@ -138,7 +139,10 @@ for (const marker of ["Карта компетенций", "Подтвержде
   if (!skillsSource.includes(marker)) errors.push(`Карта компетенций: отсутствует ${marker}`);
 }
 for (const marker of ["Разбор вашего решения", "Данные и наблюдение", "Проверяемая гипотеза", "Риск или ограничение", "не является оценкой квалификации", "olymp-case-lab"]) {
-  if (!reviewSource.includes(marker)) errors.push(`Разбор кейсов: отсутствует ${marker}`);
+  if (!reviewSource.includes(marker) && !caseRubricSource.includes(marker)) errors.push(`Разбор кейсов: отсутствует ${marker}`);
+}
+if (!learnSource.includes("evaluateCaseAnswer") || !olympusSource.includes("evaluateCaseAnswer") || !skillsSource.includes("evaluateCaseAnswer")) {
+  errors.push("Единая рубрика кейсов не используется во всех отчётах прогресса");
 }
 
 if (errors.length) {
