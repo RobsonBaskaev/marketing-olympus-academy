@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "verify": "node scripts/verify-site.mjs",
+    "check": "pnpm build && pnpm verify",
     "start": "next start"
   },
   "dependencies": {
