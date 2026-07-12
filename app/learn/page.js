@@ -221,6 +221,7 @@ export default function Learn() {
           <a href="../skills/">Открыть карту компетенций →</a>
           <a href="../review/">Разобрать письменный кейс</a>
           <a href="../curriculum/">Академическая программа</a>
+          <a href="../library/">Библиотека методов</a>
         </div>
       </section>
       <section className="next-step">

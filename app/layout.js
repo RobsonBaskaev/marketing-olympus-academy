@@ -20,6 +20,7 @@ import "./skills.css";
 import "./review.css";
 import "./start.css";
 import "./curriculum.css";
+import "./library.css";
 import PWARegister from "./pwa-register";
 
 export const metadata = {

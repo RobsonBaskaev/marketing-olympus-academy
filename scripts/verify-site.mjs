@@ -12,6 +12,7 @@ const requiredRoutes = [
   "review/index.html",
   "start/index.html",
   "curriculum/index.html",
+  "library/index.html",
   "research/index.html",
   "strategy/index.html",
   "acquisition/index.html",
@@ -107,6 +108,8 @@ const reviewSource = readFileSync(join(root, "app", "review", "review-dashboard.
 const caseRubricSource = readFileSync(join(root, "app", "lib", "case-rubric.mjs"), "utf8");
 const startSource = readFileSync(join(root, "app", "start", "start-planner.js"), "utf8");
 const curriculumSource = readFileSync(join(root, "app", "curriculum", "page.js"), "utf8");
+const librarySource = readFileSync(join(root, "app", "library", "library-browser.js"), "utf8");
+const libraryMethodsSource = readFileSync(join(root, "app", "library", "methods.mjs"), "utf8");
 const sourcesSource = readFileSync(join(root, "app", "sources", "page.js"), "utf8");
 const pagesWorkflow = readFileSync(join(root, ".github", "workflows", "pages.yml"), "utf8");
 const lessonProgressSource = readFileSync(join(root, "app", "lib", "lesson-progress.mjs"), "utf8");
@@ -190,6 +193,12 @@ if (!learnSource.includes('6: "6 часов"')) {
 }
 for (const marker of ["12", "РЕЗУЛЬТАТЫ ПРОГРАММЫ", "Кейс-семинар", "РЕКОМЕНДУЕМАЯ МОДЕЛЬ ОЦЕНКИ", "Академическая и продуктовая честность", "MIT OCW", "OpenStax"]) {
   if (!curriculumSource.includes(marker)) errors.push(`Академическая программа: отсутствует ${marker}`);
+}
+for (const marker of ["Что нужно решить?", "Все уровни", "methodCategories", "Типичная ошибка", "Сбросить фильтры"]) {
+  if (!librarySource.includes(marker) && !libraryMethodsSource.includes(marker)) errors.push(`Библиотека методов: отсутствует ${marker}`);
+}
+if ((libraryMethodsSource.match(/title:/g) || []).length < 20) {
+  errors.push("Библиотека методов: должно быть не менее 20 практических методов");
 }
 for (const marker of ["Marketing Management: Analytics, Frameworks, and Applications", "New Enterprises", "Marketing Strategy"]) {
   if (!sourcesSource.includes(marker)) errors.push(`Карта источников: отсутствует ${marker}`);
