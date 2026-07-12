@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./module.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",
