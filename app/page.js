@@ -1,54 +1,904 @@
 "use client";
-import {useEffect,useState} from "react";
+import { useEffect, useRef, useState } from "react";
 
-const lessons=[
- {title:"Что такое маркетинг",time:"7 мин",text:"Маркетинг — система создания и предложения ценности. Он начинается не с рекламы, а с понимания задачи клиента.",points:["Клиент покупает результат, а не продукт","Ценность должна быть заметной и доказуемой","Маркетинг связывает клиента, продукт и бизнес"],task:"Выберите знакомый продукт и запишите, какой результат получает его клиент."},
- {title:"Рынок и потребность",time:"8 мин",text:"Рынок существует там, где у группы людей есть общая задача, выбор решений и готовность обменять ресурсы на результат.",points:["Потребность шире продукта","Контекст меняет критерии выбора","Большая аудитория ещё не доказывает наличие рынка"],task:"Опишите рынок: кто + в какой ситуации + какую задачу решает."},
- {title:"Сегментация",time:"10 мин",text:"Хороший сегмент объединяет людей похожей задачей, контекстом, поведением и критериями выбора.",points:["Демография — только один слой","Сегмент должен быть различим и доступен","Разным сегментам нужны разные предложения"],task:"Разделите клиентов выбранного продукта на три сегмента по задачам."},
- {title:"Ценностное предложение",time:"10 мин",text:"Ценностное предложение объясняет, для кого создан продукт, какую задачу решает и почему его стоит выбрать.",points:["Конкретный клиент","Значимый результат","Отличие и подтверждение"],task:"Соберите фразу: Для [сегмента] наш продукт даёт [результат], потому что [доказательство]."},
- {title:"Позиционирование",time:"9 мин",text:"Позиционирование — место продукта в сознании аудитории относительно альтернатив.",points:["Нельзя быть всем для всех","Альтернатива — не всегда прямой конкурент","Позиция подтверждается опытом клиента"],task:"Назовите главную альтернативу и одно отличие, которое клиент может проверить."}
+const lessons = [
+  {
+    title: "Что такое маркетинг",
+    time: "7 мин",
+    text: "Маркетинг — система создания и предложения ценности. Он начинается не с рекламы, а с понимания задачи клиента.",
+    points: [
+      "Клиент покупает результат, а не продукт",
+      "Ценность должна быть заметной и доказуемой",
+      "Маркетинг связывает клиента, продукт и бизнес",
+    ],
+    task: "Выберите знакомый продукт и запишите, какой результат получает его клиент.",
+  },
+  {
+    title: "Рынок и потребность",
+    time: "8 мин",
+    text: "Рынок существует там, где у группы людей есть общая задача, выбор решений и готовность обменять ресурсы на результат.",
+    points: [
+      "Потребность шире продукта",
+      "Контекст меняет критерии выбора",
+      "Большая аудитория ещё не доказывает наличие рынка",
+    ],
+    task: "Опишите рынок: кто + в какой ситуации + какую задачу решает.",
+  },
+  {
+    title: "Сегментация",
+    time: "10 мин",
+    text: "Хороший сегмент объединяет людей похожей задачей, контекстом, поведением и критериями выбора.",
+    points: [
+      "Демография — только один слой",
+      "Сегмент должен быть различим и доступен",
+      "Разным сегментам нужны разные предложения",
+    ],
+    task: "Разделите клиентов выбранного продукта на три сегмента по задачам.",
+  },
+  {
+    title: "Ценностное предложение",
+    time: "10 мин",
+    text: "Ценностное предложение объясняет, для кого создан продукт, какую задачу решает и почему его стоит выбрать.",
+    points: [
+      "Конкретный клиент",
+      "Значимый результат",
+      "Отличие и подтверждение",
+    ],
+    task: "Соберите фразу: Для [сегмента] наш продукт даёт [результат], потому что [доказательство].",
+  },
+  {
+    title: "Позиционирование",
+    time: "9 мин",
+    text: "Позиционирование — место продукта в сознании аудитории относительно альтернатив.",
+    points: [
+      "Нельзя быть всем для всех",
+      "Альтернатива — не всегда прямой конкурент",
+      "Позиция подтверждается опытом клиента",
+    ],
+    task: "Назовите главную альтернативу и одно отличие, которое клиент может проверить.",
+  },
 ];
-const cases=[
- {company:"Кофейня «Зёрна»",type:"Локальный бизнес",problem:"После 16:00 почти нет гостей.",question:"Какой первый шаг полезнее?",choices:["Скидка 30%","Изучить продажи по времени и поговорить с гостями","Новый логотип"],best:1,hint:"Сначала ищите причину, а не готовое решение.",sample:"Выгружу продажи по часам за 8 недель и проведу 8–10 интервью с дневными гостями и теми, кто работает рядом. Проверю ассортимент, заметность предложения и поводы зайти.",why:"Есть данные, аудитория и проверяемые гипотезы — бюджет не тратится вслепую."},
- {company:"Сервис задач «Фокус»",type:"Цифровой продукт",problem:"Только 18% пользователей создают второй проект.",question:"Кого исследовать первым?",choices:["Всех людей 18–65","Создавших первый проект, но не вернувшихся за 7 дней","Всех любителей продуктивности"],best:1,hint:"Сегмент должен описывать наблюдаемое поведение.",sample:"Сравню пользователей, которые создали первый проект, но не вернулись за 7 дней, с теми, кто вернулся. Изучу задачу, источник регистрации и первый опыт.",why:"Такой сегмент можно найти в данных и связать с конкретной проблемой продукта."},
- {company:"Доставка «БыстроДом»",type:"Сервис",problem:"Повторные заказы снизились на 24%.",question:"Какое предложение проверить?",choices:["Лучшая доставка в городе","Ужин без ожидания: привычные блюда за 30 минут","Скачайте приложение"],best:1,hint:"Ищите ситуацию, результат и конкретное обещание.",sample:"Для занятых жителей района «БыстроДом» доставляет привычный ужин за 30 минут. Проверю обещание на группе и измерю повторные заказы, опоздания и жалобы.",why:"Есть сегмент, результат, обещание и метрики — это можно реально проверить."}
+const cases = [
+  {
+    company: "Кофейня «Зёрна»",
+    type: "Локальный бизнес",
+    problem: "После 16:00 почти нет гостей.",
+    question: "Какой первый шаг полезнее?",
+    choices: [
+      "Скидка 30%",
+      "Изучить продажи по времени и поговорить с гостями",
+      "Новый логотип",
+    ],
+    best: 1,
+    hint: "Сначала ищите причину, а не готовое решение.",
+    sample:
+      "Выгружу продажи по часам за 8 недель и проведу 8–10 интервью с дневными гостями и теми, кто работает рядом. Проверю ассортимент, заметность предложения и поводы зайти.",
+    why: "Есть данные, аудитория и проверяемые гипотезы — бюджет не тратится вслепую.",
+  },
+  {
+    company: "Сервис задач «Фокус»",
+    type: "Цифровой продукт",
+    problem: "Только 18% пользователей создают второй проект.",
+    question: "Кого исследовать первым?",
+    choices: [
+      "Всех людей 18–65",
+      "Создавших первый проект, но не вернувшихся за 7 дней",
+      "Всех любителей продуктивности",
+    ],
+    best: 1,
+    hint: "Сегмент должен описывать наблюдаемое поведение.",
+    sample:
+      "Сравню пользователей, которые создали первый проект, но не вернулись за 7 дней, с теми, кто вернулся. Изучу задачу, источник регистрации и первый опыт.",
+    why: "Такой сегмент можно найти в данных и связать с конкретной проблемой продукта.",
+  },
+  {
+    company: "Доставка «БыстроДом»",
+    type: "Сервис",
+    problem: "Повторные заказы снизились на 24%.",
+    question: "Какое предложение проверить?",
+    choices: [
+      "Лучшая доставка в городе",
+      "Ужин без ожидания: привычные блюда за 30 минут",
+      "Скачайте приложение",
+    ],
+    best: 1,
+    hint: "Ищите ситуацию, результат и конкретное обещание.",
+    sample:
+      "Для занятых жителей района «БыстроДом» доставляет привычный ужин за 30 минут. Проверю обещание на группе и измерю повторные заказы, опоздания и жалобы.",
+    why: "Есть сегмент, результат, обещание и метрики — это можно реально проверить.",
+  },
 ];
-function CaseTrainer(){const[index,setIndex]=useState(0),[choice,setChoice]=useState(null),[free,setFree]=useState(""),[hint,setHint]=useState(false),[sample,setSample]=useState(false);const c=cases[index],next=()=>{setIndex((index+1)%3);setChoice(null);setFree("");setHint(false);setSample(false)};return <section className="trainer"><div className="sectionhead"><div><small>ТРЕНАЖЁР ДЛЯ НОВИЧКА</small><h2>Смотрите, пробуйте, сравнивайте</h2></div><p>Подсказки, варианты решения, свободный ответ и образец с объяснением логики.</p></div><div className="trainer-card"><div className="trainer-top"><span>КЕЙС {index+1} ИЗ 3</span><b>{c.type}</b></div><h3>{c.company}</h3><p className="problem">{c.problem}</p><h4>{c.question}</h4><div className="case-options">{c.choices.map((x,i)=><button className={choice===i?(i===c.best?"right":"wrong"):""} onClick={()=>setChoice(i)} key={x}><span>{String.fromCharCode(65+i)}</span>{x}</button>)}</div>{choice!==null&&<p className={`feedback ${choice===c.best?"ok":""}`}>{choice===c.best?"Хороший выбор: сначала проверяем причину.":"Пока это предположение. Выберите действие, которое сначала даст данные."}</p>}<button className="hint-btn" onClick={()=>setHint(!hint)}>💡 {hint?"Скрыть подсказку":"Нужна подсказка"}</button>{hint&&<p className="hint-box">{c.hint}</p>}<div className="free-answer"><b>Или напишите своё решение</b><textarea value={free} onChange={e=>setFree(e.target.value)} placeholder="Мой первый шаг, данные и гипотезы…"/></div><button className="primary" onClick={()=>setSample(!sample)}>{sample?"Скрыть пример":"Показать пример сильного ответа"}</button>{sample&&<div className="sample-answer"><small>ПРИМЕР ОТВЕТА</small><p>{c.sample}</p><b>Почему ответ сильный</b><p>{c.why}</p></div>}<button className="next-case" onClick={next}>Следующий кейс →</button></div></section>}
-const test=[
- {q:"С чего начинается маркетинг?",o:["С рекламы","С понимания клиента и задачи","С логотипа"],c:1},
- {q:"Какой сегмент полезнее?",o:["Все люди 18–65","Люди с общей задачей и контекстом","Все подписчики"],c:1},
- {q:"Что подтверждает ценность?",o:["Поведение клиентов и данные","Мнение команды","Красивый слоган"],c:0}
+function CaseTrainer() {
+  const [index, setIndex] = useState(0),
+    [choice, setChoice] = useState(null),
+    [free, setFree] = useState(""),
+    [hint, setHint] = useState(false),
+    [sample, setSample] = useState(false);
+  const c = cases[index],
+    next = () => {
+      setIndex((index + 1) % 3);
+      setChoice(null);
+      setFree("");
+      setHint(false);
+      setSample(false);
+    };
+  return (
+    <section className="trainer">
+      <div className="sectionhead">
+        <div>
+          <small>ТРЕНАЖЁР ДЛЯ НОВИЧКА</small>
+          <h2>Смотрите, пробуйте, сравнивайте</h2>
+        </div>
+        <p>
+          Подсказки, варианты решения, свободный ответ и образец с объяснением
+          логики.
+        </p>
+      </div>
+      <div className="trainer-card">
+        <div className="trainer-top">
+          <span>КЕЙС {index + 1} ИЗ 3</span>
+          <b>{c.type}</b>
+        </div>
+        <h3>{c.company}</h3>
+        <p className="problem">{c.problem}</p>
+        <h4>{c.question}</h4>
+        <div className="case-options">
+          {c.choices.map((x, i) => (
+            <button
+              className={choice === i ? (i === c.best ? "right" : "wrong") : ""}
+              onClick={() => setChoice(i)}
+              key={x}
+            >
+              <span>{String.fromCharCode(65 + i)}</span>
+              {x}
+            </button>
+          ))}
+        </div>
+        {choice !== null && (
+          <p className={`feedback ${choice === c.best ? "ok" : ""}`}>
+            {choice === c.best
+              ? "Хороший выбор: сначала проверяем причину."
+              : "Пока это предположение. Выберите действие, которое сначала даст данные."}
+          </p>
+        )}
+        <button className="hint-btn" onClick={() => setHint(!hint)}>
+          💡 {hint ? "Скрыть подсказку" : "Нужна подсказка"}
+        </button>
+        {hint && <p className="hint-box">{c.hint}</p>}
+        <div className="free-answer">
+          <b>Или напишите своё решение</b>
+          <textarea
+            value={free}
+            onChange={(e) => setFree(e.target.value)}
+            placeholder="Мой первый шаг, данные и гипотезы…"
+          />
+        </div>
+        <button className="primary" onClick={() => setSample(!sample)}>
+          {sample ? "Скрыть пример" : "Показать пример сильного ответа"}
+        </button>
+        {sample && (
+          <div className="sample-answer">
+            <small>ПРИМЕР ОТВЕТА</small>
+            <p>{c.sample}</p>
+            <b>Почему ответ сильный</b>
+            <p>{c.why}</p>
+          </div>
+        )}
+        <button className="next-case" onClick={next}>
+          Следующий кейс →
+        </button>
+      </div>
+    </section>
+  );
+}
+const test = [
+  {
+    q: "С чего начинается маркетинг?",
+    o: ["С рекламы", "С понимания клиента и задачи", "С логотипа"],
+    c: 1,
+  },
+  {
+    q: "Какой сегмент полезнее?",
+    o: [
+      "Все люди 18–65",
+      "Люди с общей задачей и контекстом",
+      "Все подписчики",
+    ],
+    c: 1,
+  },
+  {
+    q: "Что подтверждает ценность?",
+    o: ["Поведение клиентов и данные", "Мнение команды", "Красивый слоган"],
+    c: 0,
+  },
 ];
-const examples=[
- "Слабый ответ: «Кофе помогает проснуться». Сильнее: «Для офисного сотрудника кофейня даёт быстрый привычный ритуал и место переключиться за 10 минут».",
- "Пример: не «рынок кофе», а «люди рядом с офисным кварталом, которым утром нужен быстрый напиток по дороге на работу».",
- "Пример сегментов: спешащие сотрудники; удалённые работники, которым нужно место; жители района, встречающиеся с друзьями.",
- "Пример: «Для занятых жителей района доставка даёт привычный ужин за 30 минут; обещание подтверждается долей заказов без опозданий».",
- "Альтернатива доставке — не только другая доставка, но и самостоятельная готовка. Проверяемое отличие — экономия 40 минут вечером."
+const examples = [
+  "Слабый ответ: «Кофе помогает проснуться». Сильнее: «Для офисного сотрудника кофейня даёт быстрый привычный ритуал и место переключиться за 10 минут».",
+  "Пример: не «рынок кофе», а «люди рядом с офисным кварталом, которым утром нужен быстрый напиток по дороге на работу».",
+  "Пример сегментов: спешащие сотрудники; удалённые работники, которым нужно место; жители района, встречающиеся с друзьями.",
+  "Пример: «Для занятых жителей района доставка даёт привычный ужин за 30 минут; обещание подтверждается долей заказов без опозданий».",
+  "Альтернатива доставке — не только другая доставка, но и самостоятельная готовка. Проверяемое отличие — экономия 40 минут вечером.",
 ];
-function LearningSetup({mode,onMode,notes}){const labels={beginner:"Новичок",practitioner:"Есть опыт",pro:"Профессионал"};return <section className="product-upgrade"><small>ПЕРСОНАЛЬНЫЙ РЕЖИМ</small><h2>Настройте обучение под себя</h2><div className="mode-grid">{[["beginner","Я новичок","Простые объяснения, шаблоны и примеры"],["practitioner","Есть опыт","Больше самостоятельной практики"],["pro","Я профессионал","Сложные вопросы и защита решений"]].map(x=><button className={mode===x[0]?"selected":""} key={x[0]} onClick={()=>onMode(x[0])}><b>{x[1]}</b><span>{x[2]}</span></button>)}</div><div className="quality-ladder"><div><small>КАК УЧИТЬСЯ</small><h3>Сначала посмотрите на разницу</h3><p><b>Слабый ответ:</b> «Нужно запустить рекламу».</p><p><b>Средний ответ:</b> «Нужно спросить клиентов, почему они не покупают».</p><p><b>Сильный ответ:</b> «Сегментирую ушедших клиентов, сравню их с повторными покупателями и проверю три гипотезы по данным и интервью».</p></div><div><small>СЛОВАРЬ НОВИЧКА</small><dl><dt>Сегмент</dt><dd>Группа людей с похожей задачей и контекстом.</dd><dt>Гипотеза</dt><dd>Проверяемое предположение о причине или решении.</dd><dt>Метрика</dt><dd>Число, показывающее изменение результата.</dd><dt>Ценность</dt><dd>Полезный результат, за который выбирают продукт.</dd></dl></div></div><div className="portfolio-preview"><b>Ваш режим: {labels[mode]}</b><span>Сохранённых работ: {Object.values(notes).filter(Boolean).length} из 5</span><p>Ответы сохраняются в браузере и постепенно превращаются в проект «Карта ценности продукта».</p></div></section>}
+function LearningSetup({ mode, onMode, notes }) {
+  const labels = {
+    beginner: "Новичок",
+    practitioner: "Есть опыт",
+    pro: "Профессионал",
+  };
+  return (
+    <section className="product-upgrade">
+      <small>ПЕРСОНАЛЬНЫЙ РЕЖИМ</small>
+      <h2>Настройте обучение под себя</h2>
+      <div className="mode-grid">
+        {[
+          ["beginner", "Я новичок", "Простые объяснения, шаблоны и примеры"],
+          ["practitioner", "Есть опыт", "Больше самостоятельной практики"],
+          ["pro", "Я профессионал", "Сложные вопросы и защита решений"],
+        ].map((x) => (
+          <button
+            className={mode === x[0] ? "selected" : ""}
+            key={x[0]}
+            onClick={() => onMode(x[0])}
+          >
+            <b>{x[1]}</b>
+            <span>{x[2]}</span>
+          </button>
+        ))}
+      </div>
+      <div className="quality-ladder">
+        <div>
+          <small>КАК УЧИТЬСЯ</small>
+          <h3>Сначала посмотрите на разницу</h3>
+          <p>
+            <b>Слабый ответ:</b> «Нужно запустить рекламу».
+          </p>
+          <p>
+            <b>Средний ответ:</b> «Нужно спросить клиентов, почему они не
+            покупают».
+          </p>
+          <p>
+            <b>Сильный ответ:</b> «Сегментирую ушедших клиентов, сравню их с
+            повторными покупателями и проверю три гипотезы по данным и
+            интервью».
+          </p>
+        </div>
+        <div>
+          <small>СЛОВАРЬ НОВИЧКА</small>
+          <dl>
+            <dt>Сегмент</dt>
+            <dd>Группа людей с похожей задачей и контекстом.</dd>
+            <dt>Гипотеза</dt>
+            <dd>Проверяемое предположение о причине или решении.</dd>
+            <dt>Метрика</dt>
+            <dd>Число, показывающее изменение результата.</dd>
+            <dt>Ценность</dt>
+            <dd>Полезный результат, за который выбирают продукт.</dd>
+          </dl>
+        </div>
+      </div>
+      <div className="portfolio-preview">
+        <b>Ваш режим: {labels[mode]}</b>
+        <span>
+          Сохранённых работ: {Object.values(notes).filter(Boolean).length} из 5
+        </span>
+        <p>
+          Ответы сохраняются в браузере и постепенно превращаются в проект
+          «Карта ценности продукта».
+        </p>
+      </div>
+    </section>
+  );
+}
 
-function AnswerCoach(){const[text,setText]=useState(""),[result,setResult]=useState(null);useEffect(()=>{try{setText(localStorage.getItem("olymp-coach-answer")||"")}catch{}},[]);const update=value=>{setText(value);localStorage.setItem("olymp-coach-answer",value);setResult(null)};const check=()=>{const s=text.toLowerCase(),rules=[{name:"Клиент и контекст",ok:/клиент|пользовател|жител|сотрудник|аудитор/.test(s),tip:"Назовите конкретного клиента и ситуацию."},{name:"Данные",ok:/данн|продаж|интервью|опрос|аналит/.test(s),tip:"Укажите, какие данные соберёте."},{name:"Гипотезы",ok:/гипотез|предполож|провер/.test(s),tip:"Сформулируйте проверяемую гипотезу."},{name:"Метрика",ok:/метрик|конверси|заказ|удерж|процент|измер/.test(s),tip:"Добавьте измеримый показатель результата."},{name:"План действий",ok:text.trim().length>=120,tip:"Опишите последовательность действий подробнее."}];setResult(rules)};const total=result?result.filter(x=>x.ok).length:0;return <section className="coach"><div className="sectionhead"><div><small>АВТОПРОВЕРКА ОТВЕТА</small><h2>Получите разбор за минуту</h2></div><p>Напишите решение своими словами. Тренажёр проверит структуру мышления и покажет, что усилить.</p></div><div className="coach-grid"><div><h3>Ситуация</h3><p>У интернет-магазина много новых покупателей, но только 12% возвращаются за второй покупкой. Что вы будете делать?</p><textarea value={text} onChange={e=>update(e.target.value)} placeholder="Опишите клиента, данные, гипотезы, план и метрику…"/><span>{text.length} символов · сохраняется автоматически</span><button className="primary" onClick={check}>Проверить мой ответ →</button></div><div className="coach-result">{!result?<><div className="empty-score">?</div><h3>Здесь появится оценка</h3><p>Оценивается полнота профессиональной логики, а не одна правильная фраза.</p></>:<><div className="score-circle">{total}/5</div><h3>{total>=4?"Сильная логика":total>=2?"Хорошая основа":"Нужно добавить структуру"}</h3>{result.map(x=><div className={x.ok?"criterion passed":"criterion"} key={x.name}><b>{x.ok?"✓":"+"} {x.name}</b><span>{x.ok?"Есть в ответе":x.tip}</span></div>)}<p className="coach-note">Предварительная автоматическая оценка. Позже AI-наставник будет анализировать смысл ответа глубже.</p></>}</div></div></section>}
+function AnswerCoach() {
+  const [text, setText] = useState(""),
+    [result, setResult] = useState(null);
+  useEffect(() => {
+    try {
+      setText(localStorage.getItem("olymp-coach-answer") || "");
+    } catch {}
+  }, []);
+  const update = (value) => {
+    setText(value);
+    localStorage.setItem("olymp-coach-answer", value);
+    setResult(null);
+  };
+  const check = () => {
+    const s = text.toLowerCase(),
+      rules = [
+        {
+          name: "Клиент и контекст",
+          ok: /клиент|пользовател|жител|сотрудник|аудитор/.test(s),
+          tip: "Назовите конкретного клиента и ситуацию.",
+        },
+        {
+          name: "Данные",
+          ok: /данн|продаж|интервью|опрос|аналит/.test(s),
+          tip: "Укажите, какие данные соберёте.",
+        },
+        {
+          name: "Гипотезы",
+          ok: /гипотез|предполож|провер/.test(s),
+          tip: "Сформулируйте проверяемую гипотезу.",
+        },
+        {
+          name: "Метрика",
+          ok: /метрик|конверси|заказ|удерж|процент|измер/.test(s),
+          tip: "Добавьте измеримый показатель результата.",
+        },
+        {
+          name: "План действий",
+          ok: text.trim().length >= 120,
+          tip: "Опишите последовательность действий подробнее.",
+        },
+      ];
+    setResult(rules);
+  };
+  const total = result ? result.filter((x) => x.ok).length : 0;
+  return (
+    <section className="coach">
+      <div className="sectionhead">
+        <div>
+          <small>АВТОПРОВЕРКА ОТВЕТА</small>
+          <h2>Получите разбор за минуту</h2>
+        </div>
+        <p>
+          Напишите решение своими словами. Тренажёр проверит структуру мышления
+          и покажет, что усилить.
+        </p>
+      </div>
+      <div className="coach-grid">
+        <div>
+          <h3>Ситуация</h3>
+          <p>
+            У интернет-магазина много новых покупателей, но только 12%
+            возвращаются за второй покупкой. Что вы будете делать?
+          </p>
+          <textarea
+            value={text}
+            onChange={(e) => update(e.target.value)}
+            placeholder="Опишите клиента, данные, гипотезы, план и метрику…"
+          />
+          <span>{text.length} символов · сохраняется автоматически</span>
+          <button className="primary" onClick={check}>
+            Проверить мой ответ →
+          </button>
+        </div>
+        <div className="coach-result">
+          {!result ? (
+            <>
+              <div className="empty-score">?</div>
+              <h3>Здесь появится оценка</h3>
+              <p>
+                Оценивается полнота профессиональной логики, а не одна
+                правильная фраза.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="score-circle">{total}/5</div>
+              <h3>
+                {total >= 4
+                  ? "Сильная логика"
+                  : total >= 2
+                    ? "Хорошая основа"
+                    : "Нужно добавить структуру"}
+              </h3>
+              {result.map((x) => (
+                <div
+                  className={x.ok ? "criterion passed" : "criterion"}
+                  key={x.name}
+                >
+                  <b>
+                    {x.ok ? "✓" : "+"} {x.name}
+                  </b>
+                  <span>{x.ok ? "Есть в ответе" : x.tip}</span>
+                </div>
+              ))}
+              <p className="coach-note">
+                Предварительная автоматическая оценка. Позже AI-наставник будет
+                анализировать смысл ответа глубже.
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-function Portfolio({notes}){const works=Object.entries(notes).filter(([,v])=>v?.trim());const download=()=>{const content=["МАРКЕТИНГ ОЛИМП — УЧЕБНОЕ ПОРТФОЛИО","",...works.flatMap(([i,v])=>[`${Number(i)+1}. ${lessons[i]?.title||"Работа"}`,v,""])].join("\n"),blob=new Blob([content],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="marketing-portfolio.txt";a.click();URL.revokeObjectURL(url)};return <section className="portfolio"><div className="sectionhead"><div><small>ПОРТФОЛИО УЧЕНИКА</small><h2>Ваши решения — уже результат</h2></div><p>Письменные работы собираются в один проект. Его можно скачать, улучшать и показывать наставнику или работодателю.</p></div><div className="portfolio-board"><div className="portfolio-status"><strong>{works.length}/5</strong><span>работ сохранено</span><div className="mini-progress"><i style={{width:`${works.length/5*100}%`}}/></div><button className="primary" disabled={!works.length} onClick={download}>Скачать портфолио ↓</button></div><div className="work-list">{lessons.map((x,i)=><article key={x.title} className={notes[i]?"ready":""}><span>{notes[i]?"✓":"○"}</span><div><b>{x.title}</b><p>{notes[i]?notes[i].slice(0,120)+(notes[i].length>120?"…":""):"Выполните задание урока, чтобы добавить работу."}</p></div></article>)}</div></div></section>}
+function Portfolio({ notes }) {
+  const works = Object.entries(notes).filter(([, v]) => v?.trim());
+  const download = () => {
+    const content = [
+        "МАРКЕТИНГ ОЛИМП — УЧЕБНОЕ ПОРТФОЛИО",
+        "",
+        ...works.flatMap(([i, v]) => [
+          `${Number(i) + 1}. ${lessons[i]?.title || "Работа"}`,
+          v,
+          "",
+        ]),
+      ].join("\n"),
+      blob = new Blob([content], { type: "text/plain;charset=utf-8" }),
+      url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = "marketing-portfolio.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <section className="portfolio">
+      <div className="sectionhead">
+        <div>
+          <small>ПОРТФОЛИО УЧЕНИКА</small>
+          <h2>Ваши решения — уже результат</h2>
+        </div>
+        <p>
+          Письменные работы собираются в один проект. Его можно скачать,
+          улучшать и показывать наставнику или работодателю.
+        </p>
+      </div>
+      <div className="portfolio-board">
+        <div className="portfolio-status">
+          <strong>{works.length}/5</strong>
+          <span>работ сохранено</span>
+          <div className="mini-progress">
+            <i style={{ width: `${(works.length / 5) * 100}%` }} />
+          </div>
+          <button
+            className="primary"
+            disabled={!works.length}
+            onClick={download}
+          >
+            Скачать портфолио ↓
+          </button>
+        </div>
+        <div className="work-list">
+          {lessons.map((x, i) => (
+            <article key={x.title} className={notes[i] ? "ready" : ""}>
+              <span>{notes[i] ? "✓" : "○"}</span>
+              <div>
+                <b>{x.title}</b>
+                <p>
+                  {notes[i]
+                    ? notes[i].slice(0, 120) +
+                      (notes[i].length > 120 ? "…" : "")
+                    : "Выполните задание урока, чтобы добавить работу."}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-function LessonContent({lesson,done,notes,mode,error,onNote,onFinish,quiz,setQuiz,answers,setAnswers}){const item=lessons[lesson],score=answers.reduce((n,a,i)=>n+(a===test[i]?.c?1:0),0),answer=i=>{const next=[...answers,i];setAnswers(next);quiz<2?setQuiz(quiz+1):setQuiz("done")};if(quiz==="done")return <div className="quiz-result"><small>МОДУЛЬ ЗАВЕРШЁН</small><div>{score}/3</div><h1>{score===3?"Отличный фундамент":"Хорошее начало"}</h1><p>{score===3?"Вы готовы переходить к исследованиям.":"Повторите уроки и попробуйте ещё раз."}</p><button className="primary" onClick={()=>{setQuiz(0);setAnswers([])}}>Пройти ещё раз</button></div>;if(quiz!==null)return <div className="quiz-page"><small>ИТОГОВЫЙ ТЕСТ · {quiz+1}/3</small><div className="progress"><i style={{width:`${(quiz+1)/3*100}%`}}/></div><h1>{test[quiz].q}</h1><div className="options">{test[quiz].o.map((x,i)=><button key={x} onClick={()=>answer(i)}><span>{String.fromCharCode(65+i)}</span>{x}</button>)}</div></div>;return <><div className="lesson-meta"><span>УРОК {lesson+1} ИЗ 5</span><span>{item.time}</span></div><h1>{item.title}</h1><p className="lesson-lead">{item.text}</p><div className="keybox"><b>Главное</b>{item.points.map(x=><p key={x}>✓ {x}</p>)}</div><div className="worked-example"><small>РАЗОБРАННЫЙ ПРИМЕР</small><p>{examples[lesson]}</p><b>Формула ответа</b><p>Кто клиент → ситуация → задача → результат → доказательство.</p></div><div className="workbox"><small>ПРАКТИЧЕСКОЕ ЗАДАНИЕ</small><h3>{item.task}</h3>{mode==="beginner"&&<div className="answer-template"><b>Ответьте по шагам</b><span>1. Кто клиент?</span><span>2. В какой он ситуации?</span><span>3. Какой результат ему нужен?</span><span>4. Чем это подтвердить?</span></div>}<textarea value={notes[lesson]||""} onChange={e=>onNote(e.target.value)} placeholder="Запишите ответ здесь…"/><p className="autosave">✓ Ответ сохраняется автоматически</p>{error&&<p className="validation-error">{error}</p>}</div><button className="primary complete" onClick={onFinish}>{done.includes(lesson)?"Обновить и продолжить →":"Завершить урок →"}</button></>}
+function LessonContent({
+  lesson,
+  done,
+  notes,
+  mode,
+  error,
+  onNote,
+  onFinish,
+  quiz,
+  setQuiz,
+  answers,
+  setAnswers,
+}) {
+  const item = lessons[lesson],
+    score = answers.reduce((n, a, i) => n + (a === test[i]?.c ? 1 : 0), 0),
+    answer = (i) => {
+      const next = [...answers, i];
+      setAnswers(next);
+      quiz < 2 ? setQuiz(quiz + 1) : setQuiz("done");
+    };
+  if (quiz === "done")
+    return (
+      <div className="quiz-result">
+        <small>МОДУЛЬ ЗАВЕРШЁН</small>
+        <div>{score}/3</div>
+        <h1>{score === 3 ? "Отличный фундамент" : "Хорошее начало"}</h1>
+        <p>
+          {score === 3
+            ? "Вы готовы переходить к исследованиям."
+            : "Повторите уроки и попробуйте ещё раз."}
+        </p>
+        <button
+          className="primary"
+          onClick={() => {
+            setQuiz(0);
+            setAnswers([]);
+          }}
+        >
+          Пройти ещё раз
+        </button>
+      </div>
+    );
+  if (quiz !== null)
+    return (
+      <div className="quiz-page">
+        <small>ИТОГОВЫЙ ТЕСТ · {quiz + 1}/3</small>
+        <div className="progress">
+          <i style={{ width: `${((quiz + 1) / 3) * 100}%` }} />
+        </div>
+        <h1>{test[quiz].q}</h1>
+        <div className="options">
+          {test[quiz].o.map((x, i) => (
+            <button key={x} onClick={() => answer(i)}>
+              <span>{String.fromCharCode(65 + i)}</span>
+              {x}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  return (
+    <>
+      <div className="lesson-meta">
+        <span>УРОК {lesson + 1} ИЗ 5</span>
+        <span>{item.time}</span>
+      </div>
+      <h1>{item.title}</h1>
+      <p className="lesson-lead">{item.text}</p>
+      <div className="keybox">
+        <b>Главное</b>
+        {item.points.map((x) => (
+          <p key={x}>✓ {x}</p>
+        ))}
+      </div>
+      <div className="worked-example">
+        <small>РАЗОБРАННЫЙ ПРИМЕР</small>
+        <p>{examples[lesson]}</p>
+        <b>Формула ответа</b>
+        <p>Кто клиент → ситуация → задача → результат → доказательство.</p>
+      </div>
+      <div className="workbox">
+        <small>ПРАКТИЧЕСКОЕ ЗАДАНИЕ</small>
+        <h3>{item.task}</h3>
+        {mode === "beginner" && (
+          <div className="answer-template">
+            <b>Ответьте по шагам</b>
+            <span>1. Кто клиент?</span>
+            <span>2. В какой он ситуации?</span>
+            <span>3. Какой результат ему нужен?</span>
+            <span>4. Чем это подтвердить?</span>
+          </div>
+        )}
+        <textarea
+          value={notes[lesson] || ""}
+          onChange={(e) => onNote(e.target.value)}
+          placeholder="Запишите ответ здесь…"
+        />
+        <p className="autosave">✓ Ответ сохраняется автоматически</p>
+        {error && <p className="validation-error">{error}</p>}
+      </div>
+      <button className="primary complete" onClick={onFinish}>
+        {done.includes(lesson) ? "Обновить и продолжить →" : "Завершить урок →"}
+      </button>
+    </>
+  );
+}
 
-export default function Page(){
- const[open,setOpen]=useState(false),[lesson,setLesson]=useState(0),[done,setDone]=useState([]),[notes,setNotes]=useState({}),[error,setError]=useState(""),[mode,setMode]=useState("beginner"),[quiz,setQuiz]=useState(null),[answers,setAnswers]=useState([]);
- useEffect(()=>{try{setDone(JSON.parse(localStorage.getItem("olymp-progress")||"[]"));setNotes(JSON.parse(localStorage.getItem("olymp-answers")||"{}"));setMode(localStorage.getItem("olymp-mode")||"beginner")}catch{}},[]);
- const progress=Math.round(done.length/lessons.length*100);
- const updateNote=value=>{const next={...notes,[lesson]:value};setNotes(next);localStorage.setItem("olymp-answers",JSON.stringify(next));setError("")};
- const finish=()=>{if((notes[lesson]||"").trim().length<30){setError("Добавьте осмысленный ответ — минимум 30 символов. Работа сохранится автоматически.");return}const next=done.includes(lesson)?done:[...done,lesson];setDone(next);localStorage.setItem("olymp-progress",JSON.stringify(next));setError("");lesson<4?setLesson(lesson+1):setQuiz(0)};
- const chooseMode=value=>{setMode(value);localStorage.setItem("olymp-mode",value)};
- return <main id="main-content">
-  <nav><a className="brand" href="#top"><span>М</span> МАРКЕТИНГ <i>ОЛИМП</i></a><div className="navlinks"><a href="#module">Первый модуль</a><a href="#program">Программа</a><a href="#practice">Практика</a></div><a className="ghost" href="learn/">Учебный кабинет</a></nav>
-  <section className="hero" id="top"><div className="eyebrow">ПЛАТФОРМА СИСТЕМНОГО МАРКЕТИНГА</div><h1>Не запоминайте<br/>маркетинг. <em>Освойте.</em></h1><p className="lead">Учитесь на реальных задачах, принимайте решения и собирайте портфолио. Первый модуль уже открыт.</p><div className="actions"><button className="primary" onClick={()=>setOpen(true)}>Начать учиться <b>↗</b></button><a href="#module">Посмотреть модуль ↓</a></div><div className="proof"><div><strong>5</strong><span>уроков</span></div><div><strong>44</strong><span>минуты</span></div><div><strong>1</strong><span>итоговый тест</span></div></div><div className="orb"><span>МОДУЛЬ 01<br/>ФУНДАМЕНТ</span><b>1</b></div></section>
-  <section className="manifesto"><p>ПЕРВЫЙ УЧЕБНЫЙ РЕЗУЛЬТАТ</p><h2>Научитесь видеть путь:<br/><i>клиент → задача → ценность → выбор.</i></h2></section>
-  <section className="learning-preview" id="module"><div className="sectionhead"><div><small>МОДУЛЬ 01</small><h2>Фундамент маркетинга</h2></div><p>Пять коротких уроков, задания на собственном продукте и проверка понимания. Прогресс сохраняется в браузере.</p></div><div className="module-layout"><div className="module-summary"><div className="ring"><span>{progress}%</span></div><h3>{done.length?"Продолжайте с места остановки":"Начните с основ"}</h3><p>{done.length} из 5 уроков завершено</p><button className="primary" onClick={()=>setOpen(true)}>{done.length?"Продолжить →":"Начать модуль →"}</button></div><div className="lesson-list">{lessons.map((x,i)=><button key={x.title} onClick={()=>{setLesson(i);setQuiz(null);setOpen(true)}}><span className={done.includes(i)?"done-dot":""}>{done.includes(i)?"✓":i+1}</span><div><b>{x.title}</b><small>{x.time} · задание</small></div><i>→</i></button>)}</div></div></section>
-  <section className="route" id="program"><div className="sectionhead"><div><small>ПОЛНАЯ ТРАЕКТОРИЯ</small><h2>От опоры — к высоте</h2></div><p>Полная практическая траектория уже открыта: пять тренажёров и итоговая защита проекта на уровне «Олимп».</p></div><div className="trackgrid">{["Фундамент","Исследования","Стратегия","Привлечение","Аналитика","Олимп"].map((x,i)=><article key={x}><span>0{i+1}</span><div className="mount">{i?"◇":"▲"}</div><h3>{x}</h3><p>Доступен сейчас</p><b>ОТКРЫТ</b></article>)}</div></section>
-  <section className="case" id="practice"><div><small>ПРАКТИКА МОДУЛЯ</small><h2>Разберите продукт, которым пользуетесь каждый день.</h2><p>Определите клиента, задачу, альтернативу, ценность и проверяемое отличие.</p></div><div className="casecard"><div className="casebar"><span>ПРОЕКТ 01</span><b>В ПОРТФОЛИО</b></div><h3>Карта ценности продукта</h3><button onClick={()=>setOpen(true)}>Начать работу →</button></div></section>
-  <LearningSetup mode={mode} onMode={chooseMode} notes={notes}/><CaseTrainer/><AnswerCoach/><Portfolio notes={notes}/><footer><div className="brand"><span>М</span> МАРКЕТИНГ <i>ОЛИМП</i></div><p><a href="learn/"><b>Учебный кабинет</b></a> · <a href="backup/">Резервная копия</a> · <a href="research/">02 Исследования</a> · <a href="strategy/">03 Стратегия</a> · <a href="acquisition/">04 Привлечение</a> · <a href="analytics/">05 Аналитика</a> · <a href="olympus/">06 Олимп</a><br/><a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> · <a href="methodology/">Методология</a> · <a href="faq/">FAQ</a></p><button className="primary" onClick={()=>setOpen(true)}>Открыть первый урок</button></footer>
-  {open&&<div className="course-shell" role="dialog" aria-label="Учебный модуль"><aside><button className="back" onClick={()=>setOpen(false)}>← На главную</button><small>МОДУЛЬ 01</small><h2>Фундамент</h2><div className="mini-progress"><i style={{width:`${progress}%`}}/></div><p>{progress}% завершено</p>{lessons.map((x,i)=><button className={`side-lesson ${lesson===i&&quiz===null?"active":""}`} key={x.title} onClick={()=>{setLesson(i);setQuiz(null);setError("")}}><span>{done.includes(i)?"✓":i+1}</span>{x.title}</button>)}<button className={`side-lesson ${quiz!==null?"active":""}`} onClick={()=>setQuiz(0)}><span>★</span>Итоговый тест</button></aside><section className="lesson-page"><LessonContent lesson={lesson} done={done} notes={notes} mode={mode} error={error} onNote={updateNote} onFinish={finish} quiz={quiz} setQuiz={setQuiz} answers={answers} setAnswers={setAnswers}/></section></div>}
- </main>
+export default function Page() {
+  const dialogRef = useRef(null);
+  const [open, setOpen] = useState(false),
+    [lesson, setLesson] = useState(0),
+    [done, setDone] = useState([]),
+    [notes, setNotes] = useState({}),
+    [error, setError] = useState(""),
+    [mode, setMode] = useState("beginner"),
+    [quiz, setQuiz] = useState(null),
+    [answers, setAnswers] = useState([]);
+  useEffect(() => {
+    try {
+      setDone(JSON.parse(localStorage.getItem("olymp-progress") || "[]"));
+      setNotes(JSON.parse(localStorage.getItem("olymp-answers") || "{}"));
+      setMode(localStorage.getItem("olymp-mode") || "beginner");
+    } catch {}
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    const closeButton = dialogRef.current?.querySelector("button");
+    const close = (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = [...dialogRef.current.querySelectorAll(
+        'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), a[href]',
+      )];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", close);
+    closeButton?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", close);
+      previousFocus?.focus?.();
+    };
+  }, [open]);
+  const progress = Math.round((done.length / lessons.length) * 100);
+  const updateNote = (value) => {
+    const next = { ...notes, [lesson]: value };
+    setNotes(next);
+    localStorage.setItem("olymp-answers", JSON.stringify(next));
+    setError("");
+  };
+  const finish = () => {
+    if ((notes[lesson] || "").trim().length < 30) {
+      setError(
+        "Добавьте осмысленный ответ — минимум 30 символов. Работа сохранится автоматически.",
+      );
+      return;
+    }
+    const next = done.includes(lesson) ? done : [...done, lesson];
+    setDone(next);
+    localStorage.setItem("olymp-progress", JSON.stringify(next));
+    setError("");
+    lesson < 4 ? setLesson(lesson + 1) : setQuiz(0);
+  };
+  const chooseMode = (value) => {
+    setMode(value);
+    localStorage.setItem("olymp-mode", value);
+  };
+  return (
+    <main id="main-content">
+      <nav>
+        <a className="brand" href="#top">
+          <span>М</span> МАРКЕТИНГ <i>ОЛИМП</i>
+        </a>
+        <div className="navlinks">
+          <a href="#module">Первый модуль</a>
+          <a href="#program">Программа</a>
+          <a href="#practice">Практика</a>
+        </div>
+        <a className="ghost" href="learn/">
+          Учебный кабинет
+        </a>
+      </nav>
+      <section className="hero" id="top">
+        <div className="eyebrow">ПЛАТФОРМА СИСТЕМНОГО МАРКЕТИНГА</div>
+        <h1>
+          Не запоминайте
+          <br />
+          маркетинг. <em>Освойте.</em>
+        </h1>
+        <p className="lead">
+          Учитесь на реальных задачах, принимайте решения и собирайте портфолио.
+          Первый модуль уже открыт.
+        </p>
+        <div className="actions">
+          <button className="primary" onClick={() => setOpen(true)}>
+            Начать учиться <b>↗</b>
+          </button>
+          <a href="#module">Посмотреть модуль ↓</a>
+        </div>
+        <div className="proof">
+          <div>
+            <strong>5</strong>
+            <span>уроков</span>
+          </div>
+          <div>
+            <strong>44</strong>
+            <span>минуты</span>
+          </div>
+          <div>
+            <strong>1</strong>
+            <span>итоговый тест</span>
+          </div>
+        </div>
+        <div className="orb">
+          <span>
+            МОДУЛЬ 01
+            <br />
+            ФУНДАМЕНТ
+          </span>
+          <b>1</b>
+        </div>
+      </section>
+      <section className="manifesto">
+        <p>ПЕРВЫЙ УЧЕБНЫЙ РЕЗУЛЬТАТ</p>
+        <h2>
+          Научитесь видеть путь:
+          <br />
+          <i>клиент → задача → ценность → выбор.</i>
+        </h2>
+      </section>
+      <section className="learning-preview" id="module">
+        <div className="sectionhead">
+          <div>
+            <small>МОДУЛЬ 01</small>
+            <h2>Фундамент маркетинга</h2>
+          </div>
+          <p>
+            Пять коротких уроков, задания на собственном продукте и проверка
+            понимания. Прогресс сохраняется в браузере.
+          </p>
+        </div>
+        <div className="module-layout">
+          <div className="module-summary">
+            <div className="ring">
+              <span>{progress}%</span>
+            </div>
+            <h3>
+              {done.length
+                ? "Продолжайте с места остановки"
+                : "Начните с основ"}
+            </h3>
+            <p>{done.length} из 5 уроков завершено</p>
+            <button className="primary" onClick={() => setOpen(true)}>
+              {done.length ? "Продолжить →" : "Начать модуль →"}
+            </button>
+          </div>
+          <div className="lesson-list">
+            {lessons.map((x, i) => (
+              <button
+                key={x.title}
+                onClick={() => {
+                  setLesson(i);
+                  setQuiz(null);
+                  setOpen(true);
+                }}
+              >
+                <span className={done.includes(i) ? "done-dot" : ""}>
+                  {done.includes(i) ? "✓" : i + 1}
+                </span>
+                <div>
+                  <b>{x.title}</b>
+                  <small>{x.time} · задание</small>
+                </div>
+                <i>→</i>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="route" id="program">
+        <div className="sectionhead">
+          <div>
+            <small>ПОЛНАЯ ТРАЕКТОРИЯ</small>
+            <h2>От опоры — к высоте</h2>
+          </div>
+          <p>
+            Полная практическая траектория уже открыта: пять тренажёров и
+            итоговая защита проекта на уровне «Олимп».
+          </p>
+        </div>
+        <div className="trackgrid">
+          {[
+            "Фундамент",
+            "Исследования",
+            "Стратегия",
+            "Привлечение",
+            "Аналитика",
+            "Олимп",
+          ].map((x, i) => (
+            <article key={x}>
+              <span>0{i + 1}</span>
+              <div className="mount">{i ? "◇" : "▲"}</div>
+              <h3>{x}</h3>
+              <p>Доступен сейчас</p>
+              <b>ОТКРЫТ</b>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="case" id="practice">
+        <div>
+          <small>ПРАКТИКА МОДУЛЯ</small>
+          <h2>Разберите продукт, которым пользуетесь каждый день.</h2>
+          <p>
+            Определите клиента, задачу, альтернативу, ценность и проверяемое
+            отличие.
+          </p>
+        </div>
+        <div className="casecard">
+          <div className="casebar">
+            <span>ПРОЕКТ 01</span>
+            <b>В ПОРТФОЛИО</b>
+          </div>
+          <h3>Карта ценности продукта</h3>
+          <button onClick={() => setOpen(true)}>Начать работу →</button>
+        </div>
+      </section>
+      <LearningSetup mode={mode} onMode={chooseMode} notes={notes} />
+      <CaseTrainer />
+      <AnswerCoach />
+      <Portfolio notes={notes} />
+      <footer>
+        <div className="brand">
+          <span>М</span> МАРКЕТИНГ <i>ОЛИМП</i>
+        </div>
+        <p>
+          <a href="learn/">
+            <b>Учебный кабинет</b>
+          </a>{" "}
+          · <a href="backup/">Резервная копия</a> ·{" "}
+          <a href="research/">02 Исследования</a> ·{" "}
+          <a href="strategy/">03 Стратегия</a> ·{" "}
+          <a href="acquisition/">04 Привлечение</a> ·{" "}
+          <a href="analytics/">05 Аналитика</a> ·{" "}
+          <a href="olympus/">06 Олимп</a>
+          <br />
+          <a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> ·{" "}
+          <a href="methodology/">Методология</a> · <a href="faq/">FAQ</a>
+        </p>
+        <button className="primary" onClick={() => setOpen(true)}>
+          Открыть первый урок
+        </button>
+      </footer>
+      {open && (
+        <div
+          className="course-shell"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="course-dialog-title"
+          ref={dialogRef}
+        >
+          <aside>
+            <button className="back" onClick={() => setOpen(false)}>
+              ← На главную
+            </button>
+            <small>МОДУЛЬ 01</small>
+            <h2 id="course-dialog-title">Фундамент</h2>
+            <div className="mini-progress">
+              <i style={{ width: `${progress}%` }} />
+            </div>
+            <p>{progress}% завершено</p>
+            {lessons.map((x, i) => (
+              <button
+                className={`side-lesson ${lesson === i && quiz === null ? "active" : ""}`}
+                key={x.title}
+                onClick={() => {
+                  setLesson(i);
+                  setQuiz(null);
+                  setError("");
+                }}
+              >
+                <span>{done.includes(i) ? "✓" : i + 1}</span>
+                {x.title}
+              </button>
+            ))}
+            <button
+              className={`side-lesson ${quiz !== null ? "active" : ""}`}
+              onClick={() => setQuiz(0)}
+            >
+              <span>★</span>Итоговый тест
+            </button>
+          </aside>
+          <section className="lesson-page">
+            <LessonContent
+              lesson={lesson}
+              done={done}
+              notes={notes}
+              mode={mode}
+              error={error}
+              onNote={updateNote}
+              onFinish={finish}
+              quiz={quiz}
+              setQuiz={setQuiz}
+              answers={answers}
+              setAnswers={setAnswers}
+            />
+          </section>
+        </div>
+      )}
+    </main>
+  );
 }

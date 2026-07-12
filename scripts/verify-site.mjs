@@ -53,6 +53,12 @@ for (const file of htmlFiles) {
   if (!/<html[^>]+lang="ru"/i.test(html)) errors.push(`${label}: не указан русский язык`);
   if (!/<title>[^<]+<\/title>/i.test(html)) errors.push(`${label}: отсутствует title`);
   if (!/<meta[^>]+name="description"/i.test(html)) errors.push(`${label}: отсутствует description`);
+  if (!/<main[^>]+id="main-content"/i.test(html) && label !== "404.html") {
+    errors.push(`${label}: отсутствует основная область main-content`);
+  }
+  if (!/class="skip-link"[^>]+href="#main-content"/i.test(html)) {
+    errors.push(`${label}: отсутствует ссылка пропуска навигации`);
+  }
 
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const value = match[1];
@@ -78,6 +84,18 @@ try {
 const serviceWorker = readFileSync(join(dist, "sw.js"), "utf8");
 if (!serviceWorker.includes("fetch") || !serviceWorker.includes("caches")) {
   errors.push("sw.js: отсутствует обработка офлайн-кэша");
+}
+
+const mainSource = readFileSync(join(root, "app", "page.js"), "utf8");
+const accessibilityCss = readFileSync(join(root, "app", "accessibility.css"), "utf8");
+if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
+  errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
+}
+for (const selector of ["button:focus-visible", "a:focus-visible", "input:focus-visible", "textarea:focus-visible", "summary:focus-visible"]) {
+  if (!accessibilityCss.includes(selector)) errors.push(`Доступность: отсутствует стиль ${selector}`);
+}
+if (!/button\s*\{[^}]*min-height:\s*44px/s.test(accessibilityCss)) {
+  errors.push("Доступность: минимальная высота кнопки меньше 44px");
 }
 
 if (errors.length) {
