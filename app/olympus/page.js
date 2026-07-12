@@ -16,6 +16,7 @@ export default function Olympus() {
       strategy: {},
       acquisition: {},
       analytics: {},
+      caseLab: { selected: {}, drafts: {} },
     }),
     [final, setFinal] = useState({ summary: "", risk: "", experiment: "" });
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function Olympus() {
       strategy: safeParse("olymp-strategy", {}),
       acquisition: safeParse("olymp-acquisition", {}),
       analytics: safeParse("olymp-analytics", {}),
+      caseLab: safeParse("olymp-case-lab", { selected: {}, drafts: {} }),
     });
     setFinal(
       safeParse("olymp-capstone", { summary: "", risk: "", experiment: "" }),
@@ -52,7 +54,10 @@ export default function Olympus() {
         0,
       ) === 300000,
     analyticsReady =
-      artifacts.analytics.data && Number(artifacts.analytics.data.sales) > 0;
+      artifacts.analytics.data && Number(artifacts.analytics.data.sales) > 0,
+    caseCount = Object.keys(artifacts.caseLab.selected || {}).filter(
+      (id) => String(artifacts.caseLab.drafts?.[id] || "").trim().length >= 80,
+    ).length;
   const modules = [
       {
         n: "01",
@@ -86,6 +91,12 @@ export default function Olympus() {
         ready: analyticsReady,
         detail: analyticsReady ? "Воронка сохранена" : "Нет воронки",
       },
+      {
+        n: "P",
+        name: "Практикум кейсов",
+        ready: caseCount >= 1,
+        detail: `${caseCount}/4 кейса завершено`,
+      },
     ],
     readyCount = modules.filter((x) => x.ready).length,
     defence = [
@@ -97,7 +108,7 @@ export default function Olympus() {
   const exportDossier = () => {
     const text = [
         "МАРКЕТИНГ ОЛИМП — ВЫПУСКНОЕ ДОСЬЕ",
-        `Готовность: ${total}/8`,
+        `Готовность: ${total}/9`,
         "",
         "ИТОГОВОЕ РЕЗЮМЕ",
         final.summary || "—",
@@ -114,6 +125,7 @@ export default function Olympus() {
         `Стратегия: ${strategyReady ? "собрана" : "не завершена"}`,
         `Медиаплан: ${acqReady ? "собран" : "не завершён"}`,
         `Аналитика: ${analyticsReady ? "собрана" : "не завершена"}`,
+        `Практикум: ${caseCount}/4 кейса`,
         "",
         "Черновые данные проекта",
         JSON.stringify(artifacts, null, 2),
@@ -137,7 +149,7 @@ export default function Olympus() {
           покажите, что умеете связывать клиента, стратегию, каналы и цифры.
         </p>
         <div className="summit-score">
-          <strong>{total}/8</strong>
+          <strong>{total}/9</strong>
           <span>готовность к защите</span>
         </div>
       </header>
@@ -168,7 +180,9 @@ export default function Olympus() {
                         ? "../strategy/"
                         : x.n === "04"
                           ? "../acquisition/"
-                          : "../analytics/"
+                          : x.n === "05"
+                            ? "../analytics/"
+                            : "../cases/"
                 }
               >
                 {x.ready ? "Пересмотреть" : "Завершить"} →
@@ -225,14 +239,14 @@ export default function Olympus() {
       <section className="summit-result">
         <div className="mountain-mark">▲</div>
         <h2>
-          {total === 8
+          {total === 9
             ? "Вы готовы к защите"
             : total >= 5
               ? "Вершина близко"
               : "Продолжайте собирать доказательства"}
         </h2>
         <p>
-          {total === 8
+          {total === 9
             ? "Все основные артефакты и ответы собраны. Скачайте досье и проведите внешнюю экспертную проверку."
             : "Вернитесь к незавершённым модулям и усилите финальные ответы."}
         </p>

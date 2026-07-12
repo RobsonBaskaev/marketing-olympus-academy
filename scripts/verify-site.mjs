@@ -91,6 +91,8 @@ const mainSource = readFileSync(join(root, "app", "page.js"), "utf8");
 const accessibilityCss = readFileSync(join(root, "app", "accessibility.css"), "utf8");
 const caseLabSource = readFileSync(join(root, "app", "cases", "case-lab.js"), "utf8");
 const backupSource = readFileSync(join(root, "app", "backup", "page.js"), "utf8");
+const learnSource = readFileSync(join(root, "app", "learn", "page.js"), "utf8");
+const olympusSource = readFileSync(join(root, "app", "olympus", "page.js"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
   errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
 }
@@ -105,6 +107,14 @@ for (const marker of ["Новичок", "Начинающий", "Уверенн�
 }
 if (!backupSource.includes('"olymp-case-lab"')) {
   errors.push("Резервная копия: не включён прогресс практикума кейсов");
+}
+for (const [label, source] of [["Учебный кабинет", learnSource], ["Выпускное досье", olympusSource]]) {
+  if (!source.includes('"olymp-case-lab"') || !source.includes("caseCount")) {
+    errors.push(`${label}: практикум кейсов не включён в прогресс`);
+  }
+}
+if (!olympusSource.includes("${total}/9")) {
+  errors.push("Выпускное досье: неверное число критериев готовности");
 }
 
 if (errors.length) {
