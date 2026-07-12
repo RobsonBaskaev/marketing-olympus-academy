@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://robsonbaskaev.github.io/marketing-olympus-academy/sitemap.xml
