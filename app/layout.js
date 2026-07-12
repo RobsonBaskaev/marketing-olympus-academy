@@ -7,6 +7,7 @@ import "./portfolio.css";
 import "./accessibility.css";
 import "./resources.css";
 import "./lesson-enhance.css";
+import "./trust.css";
 
 export const metadata = {
   title: "Маркетинг: от азов до Олимпа",
@@ -23,6 +24,8 @@ export const metadata = {
   }
 };
 
+const courseSchema = {"@context":"https://schema.org","@type":"Course",name:"Маркетинг: от азов до Олимпа",description:"Интерактивный тренажёр системного маркетинга с уроками, кейсами, проверкой ответов и портфолио.",url:"https://robsonbaskaev.github.io/marketing-olympus-academy/",inLanguage:"ru",educationalLevel:"От начинающего до профессионального",isAccessibleForFree:true,provider:{"@type":"Organization",name:"Маркетинг Олимп"},teaches:["Основы маркетинга","Сегментация","Ценностное предложение","Позиционирование","Решение маркетинговых кейсов"]};
+
 export default function RootLayout({ children }) {
-  return <html lang="ru"><body><a className="skip-link" href="#main-content">Перейти к содержанию</a>{children}</body></html>;
+  return <html lang="ru"><body><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(courseSchema)}}/><a className="skip-link" href="#main-content">Перейти к содержанию</a>{children}</body></html>;
 }
