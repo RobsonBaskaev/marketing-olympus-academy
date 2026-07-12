@@ -15,6 +15,7 @@ import "./analytics.css";
 import "./olympus.css";
 import "./learn.css";
 import "./backup.css";
+import "./diagnostic.css";
 import PWARegister from "./pwa-register";
 
 export const metadata = {

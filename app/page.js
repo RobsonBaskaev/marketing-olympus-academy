@@ -684,6 +684,9 @@ export default function Page() {
           Первый модуль уже открыт.
         </p>
         <div className="actions">
+          <a className="primary" href="diagnostic/">
+            Определить мой уровень
+          </a>
           <button className="primary" onClick={() => setOpen(true)}>
             Начать учиться <b>↗</b>
           </button>

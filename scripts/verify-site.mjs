@@ -7,6 +7,7 @@ const basePath = "/marketing-olympus-academy";
 const requiredRoutes = [
   "index.html",
   "learn/index.html",
+  "diagnostic/index.html",
   "research/index.html",
   "strategy/index.html",
   "acquisition/index.html",
@@ -93,6 +94,7 @@ const caseLabSource = readFileSync(join(root, "app", "cases", "case-lab.js"), "u
 const backupSource = readFileSync(join(root, "app", "backup", "page.js"), "utf8");
 const learnSource = readFileSync(join(root, "app", "learn", "page.js"), "utf8");
 const olympusSource = readFileSync(join(root, "app", "olympus", "page.js"), "utf8");
+const diagnosticSource = readFileSync(join(root, "app", "diagnostic", "diagnostic.js"), "utf8");
 if (!mainSource.includes('aria-modal="true"') || !mainSource.includes('event.key === "Escape"')) {
   errors.push("Учебный диалог: отсутствует модальное поведение или закрытие по Escape");
 }
@@ -108,6 +110,9 @@ for (const marker of ["Новичок", "Начинающий", "Уверенн�
 if (!backupSource.includes('"olymp-case-lab"')) {
   errors.push("Резервная копия: не включён прогресс практикума кейсов");
 }
+if (!backupSource.includes('"olymp-diagnostic"')) {
+  errors.push("Резервная копия: не включён результат диагностики");
+}
 for (const [label, source] of [["Учебный кабинет", learnSource], ["Выпускное досье", olympusSource]]) {
   if (!source.includes('"olymp-case-lab"') || !source.includes("caseCount")) {
     errors.push(`${label}: практикум кейсов не включён в прогресс`);
@@ -115,6 +120,12 @@ for (const [label, source] of [["Учебный кабинет", learnSource], [
 }
 if (!olympusSource.includes("${total}/9")) {
   errors.push("Выпускное досье: неверное число критериев готовности");
+}
+if ((diagnosticSource.match(/skill:/g) || []).length !== 3) {
+  errors.push("Диагностика: должно быть ровно три мини-кейса");
+}
+for (const marker of ["olymp-diagnostic", "Новичок", "Практик", "Системный маркетолог", "не подтверждение квалификации"]) {
+  if (!diagnosticSource.includes(marker)) errors.push(`Диагностика: отсутствует ${marker}`);
 }
 
 if (errors.length) {
