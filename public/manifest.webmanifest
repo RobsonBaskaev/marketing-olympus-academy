@@ -1,0 +1,14 @@
+{
+  "name": "Маркетинг Олимп — тренажёр",
+  "short_name": "Маркетинг Олимп",
+  "description": "Практическое обучение маркетингу: уроки, кейсы, симуляторы и портфолио.",
+  "lang": "ru",
+  "start_url": "/marketing-olympus-academy/learn/",
+  "scope": "/marketing-olympus-academy/",
+  "display": "standalone",
+  "background_color": "#f7f5ee",
+  "theme_color": "#10151c",
+  "icons": [
+    {"src":"/marketing-olympus-academy/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
