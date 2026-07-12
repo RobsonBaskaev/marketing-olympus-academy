@@ -130,13 +130,18 @@ const levels = [
 const empty = { step: 0, answers: [], finished: false };
 export default function Diagnostic() {
   const [state, setState] = useState(empty),
+    [history, setHistory] = useState([]),
     [loaded, setLoaded] = useState(false);
   useEffect(() => {
     try {
       const saved = JSON.parse(
         localStorage.getItem("olymp-diagnostic") || "null",
       );
+      const savedHistory = JSON.parse(
+        localStorage.getItem("olymp-diagnostic-history") || "[]",
+      );
       if (saved?.answers?.length === 3) setState({ ...saved, finished: true });
+      if (Array.isArray(savedHistory)) setHistory(savedHistory.slice(-10));
     } catch {}
     setLoaded(true);
   }, []);
@@ -159,12 +164,33 @@ export default function Diagnostic() {
           completedAt: finished ? new Date().toISOString() : null,
         };
       setState(next);
-      if (finished)
+      if (finished) {
         localStorage.setItem("olymp-diagnostic", JSON.stringify(next));
+        const previous = (() => {
+            try {
+              const parsed = JSON.parse(
+                localStorage.getItem("olymp-diagnostic-history") || "[]",
+              );
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          })(),
+          updatedHistory = [...previous, next].slice(-10);
+        localStorage.setItem(
+          "olymp-diagnostic-history",
+          JSON.stringify(updatedHistory),
+        );
+        setHistory(updatedHistory);
+      }
     },
     reset = () => {
       localStorage.removeItem("olymp-diagnostic");
       setState(empty);
+    },
+    clearHistory = () => {
+      localStorage.removeItem("olymp-diagnostic-history");
+      setHistory([]);
     };
   if (!loaded)
     return (
@@ -193,6 +219,46 @@ export default function Diagnostic() {
           <div>
             <small>ЗОНА РОСТА</small>
             <h2>{level.focus}</h2>
+          </div>
+        </section>
+        <section className="diagnostic-history" aria-label="История попыток">
+          <div className="history-heading">
+            <div>
+              <small>ДИНАМИКА ОБУЧЕНИЯ</small>
+              <h2>История попыток</h2>
+            </div>
+            {history.length > 0 && (
+              <button onClick={clearHistory}>Очистить историю</button>
+            )}
+          </div>
+          {history.length > 1 ? (
+            <p className="history-change">
+              {score - Number(history[history.length - 2].score || 0) > 0
+                ? `Рост на ${score - Number(history[history.length - 2].score || 0)} балл(а) с прошлой попытки.`
+                : score - Number(history[history.length - 2].score || 0) < 0
+                  ? `На ${Math.abs(score - Number(history[history.length - 2].score || 0))} балл(а) ниже прошлой попытки — разбор покажет, что повторить.`
+                  : "Результат не изменился — сравните решения и попробуйте усилить аргументацию."}
+            </p>
+          ) : (
+            <p className="history-change">
+              Это первая сохранённая попытка. Пройдите диагностику позже ещё раз, чтобы увидеть динамику.
+            </p>
+          )}
+          <div className="history-list">
+            {[...history].reverse().slice(0, 5).map((attempt, index) => {
+              const attemptLevel = levels.find((x) => Number(attempt.score) <= x.max) || levels[2];
+              return (
+                <article key={`${attempt.completedAt}-${index}`}>
+                  <b>{attempt.score}/6</b>
+                  <span>{attemptLevel.name}</span>
+                  <time dateTime={attempt.completedAt}>
+                    {attempt.completedAt
+                      ? new Date(attempt.completedAt).toLocaleDateString("ru-RU")
+                      : "Дата не сохранена"}
+                  </time>
+                </article>
+              );
+            })}
           </div>
         </section>
         <section className="answer-review">

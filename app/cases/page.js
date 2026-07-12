@@ -5,4 +5,4 @@ export const metadata = {
   description: "Многоуровневый тренажёр маркетинговых решений с данными, вариантами, обратной связью и образцами ответов.",
 };
 
-export default function Cases(){return <CaseLab/>}
+export default function Cases(){return <><CaseLab/><a className="case-review-link" href="../review/">Разобрать мой ответ →</a></>}

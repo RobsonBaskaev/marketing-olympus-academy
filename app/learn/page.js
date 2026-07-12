@@ -59,6 +59,7 @@ export default function Learn() {
     ready: [],
     details: [],
     diagnostic: null,
+    diagnosticHistory: [],
   });
   useEffect(() => {
     const notes = parse("olymp-answers", {}),
@@ -68,6 +69,7 @@ export default function Learn() {
       analytics = parse("olymp-analytics", {}),
       caseLab = parse("olymp-case-lab", { selected: {}, drafts: {} }),
       diagnostic = parse("olymp-diagnostic", null),
+      diagnosticHistory = parse("olymp-diagnostic-history", []),
       cap = parse("olymp-capstone", {}),
       noteCount = Object.values(notes).filter(
         (v) => String(v || "").length >= 30,
@@ -116,6 +118,9 @@ export default function Learn() {
         diagnostic?.finished && Number.isFinite(Number(diagnostic.score))
           ? diagnostic
           : null,
+      diagnosticHistory: Array.isArray(diagnosticHistory)
+        ? diagnosticHistory.slice(-10)
+        : [],
     });
   }, []);
   const done = state.ready.filter(Boolean).length,
@@ -132,6 +137,10 @@ export default function Learn() {
         ? { name: "Практик", route: "Продолжите с исследований", href: "../research/" }
         : { name: "Системный маркетолог", route: "Переходите к стратегии", href: "../strategy/" }
     : null;
+  const previousDiagnostic =
+    state.diagnosticHistory.length > 1
+      ? state.diagnosticHistory[state.diagnosticHistory.length - 2]
+      : null;
   return (
     <main id="main-content" className="learn-page">
       <header>
@@ -159,6 +168,10 @@ export default function Learn() {
               <p>
                 {state.diagnostic.score}/6 баллов · {diagnosticLevel.route}. Результат
                 предварительный и уточняется по практическим работам.
+                {state.diagnosticHistory.length > 0 &&
+                  ` Сохранено попыток: ${state.diagnosticHistory.length}.`}
+                {previousDiagnostic &&
+                  ` Изменение: ${Number(state.diagnostic.score) - Number(previousDiagnostic.score) >= 0 ? "+" : ""}${Number(state.diagnostic.score) - Number(previousDiagnostic.score)}.`}
               </p>
             </div>
             <div className="diagnostic-summary-actions">
@@ -178,6 +191,17 @@ export default function Learn() {
             </a>
           </>
         )}
+      </section>
+      <section className="skills-entry">
+        <div>
+          <small>ДОКАЗАТЕЛЬСТВА НАВЫКОВ</small>
+          <h2>Не только прогресс, но и компетенции</h2>
+          <p>Посмотрите, какие навыки уже подтверждены выполненными работами и что усилить дальше.</p>
+        </div>
+        <div className="skills-entry-actions">
+          <a href="../skills/">Открыть карту компетенций →</a>
+          <a href="../review/">Разобрать письменный кейс</a>
+        </div>
       </section>
       <section className="next-step">
         <div>

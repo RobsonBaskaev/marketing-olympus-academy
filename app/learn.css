@@ -59,6 +59,11 @@
   justify-content: space-between;
   align-items: center;
 }
+.skills-entry { max-width: 1150px; margin: 18px auto 0; padding: 24px 35px; background: #111820; color: white; display: flex; align-items: center; justify-content: space-between; gap: 25px; }
+.skills-entry h2 { margin: 8px 0; font-size: 27px; }
+.skills-entry p { margin: 0; color: #b7c0c8; }
+.skills-entry a { color: #d9ff43; font-weight: 800; white-space: nowrap; }
+.skills-entry-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 .diagnostic-summary {
   max-width: 1150px;
   margin: 35px auto 0;
@@ -187,6 +192,9 @@
     min-width: 0;
     margin-top: 20px;
   }
+  .skills-entry { margin: 20px; display: block; }
+  .skills-entry a { display: inline-block; margin-top: 18px; white-space: normal; }
+  .skills-entry-actions { align-items: flex-start; }
   .next-step .primary {
     display: inline-block;
     margin-top: 18px;
