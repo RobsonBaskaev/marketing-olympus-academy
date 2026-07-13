@@ -598,6 +598,7 @@ function LessonContent({
 export default function Page() {
   const dialogRef = useRef(null);
   const [open, setOpen] = useState(false),
+    [menuOpen, setMenuOpen] = useState(false),
     [lesson, setLesson] = useState(0),
     [done, setDone] = useState([]),
     [notes, setNotes] = useState({}),
@@ -701,14 +702,24 @@ export default function Page() {
         <a className="brand" href="#top">
           <span>М</span> МАРКЕТИНГ <i>ОЛИМП</i>
         </a>
-        <div className="navlinks">
-          <a href="#module">Первый модуль</a>
-          <a href="#program">Программа</a>
-          <a href="#practice">Практика</a>
+        <div className={`navlinks${menuOpen ? " open" : ""}`}>
+          <a href="#module" onClick={() => setMenuOpen(false)}>Первый модуль</a>
+          <a href="#program" onClick={() => setMenuOpen(false)}>Программа</a>
+          <a href="#practice" onClick={() => setMenuOpen(false)}>Практика</a>
         </div>
-        <a className="ghost" href="learn/">
-          Учебный кабинет
-        </a>
+        <div className="nav-actions">
+          <a className="ghost" href="learn/">
+            Учебный кабинет
+          </a>
+          <button
+            className="menu-toggle"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        </div>
       </nav>
       <section className="hero" id="top">
         <div className="eyebrow">ПЛАТФОРМА СИСТЕМНОГО МАРКЕТИНГА</div>
@@ -889,7 +900,7 @@ export default function Page() {
           <a href="analytics/">05 Аналитика</a> ·{" "}
           <a href="olympus/">06 Олимп</a>
           <br />
-          <a href="library/">Библиотека методов</a> · <a href="business-diagnostic/">Диагностика бизнеса</a> · <a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> ·{" "}
+          <a href="library/">Библиотека методов</a> · <a href="business-diagnostic/">Диагностика бизнеса</a> · <a href="pro/">Олимп Pro</a> · <a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> ·{" "}
           <a href="methodology/">Методология</a> ·{" "}
           <a href="sources/">Источники</a> · <a href="faq/">FAQ</a>
         </p>

@@ -10,6 +10,7 @@
     "test:progress": "node scripts/test-lesson-progress.mjs",
     "test:analytics": "node scripts/test-analytics-validation.mjs",
     "test:business": "node scripts/test-business-diagnostic.mjs",
+    "test:smoke": "node scripts/test-smoke.mjs",
     "check": "pnpm build && pnpm verify && pnpm test:rubric && pnpm test:progress && pnpm test:analytics && pnpm test:business",
     "start": "next start"
   },
