@@ -33,6 +33,10 @@ const requiredPublicFiles = [
   "manifest.webmanifest",
   "sw.js",
   "icon.svg",
+  "icon-192.png",
+  "icon-512.png",
+  "apple-touch-icon.png",
+  "og.png",
   "robots.txt",
   "sitemap.xml"
 ];
@@ -74,6 +78,10 @@ for (const file of htmlFiles) {
     const ogUrl = html.match(/<meta[^>]+property="og:url"[^>]+content="([^"]+)"/i)?.[1];
     if (ogTitle !== title) errors.push(`${label}: og:title не совпадает с title`);
     if (ogUrl !== expectedCanonical) errors.push(`${label}: og:url ${ogUrl || "отсутствует"}, ожидался ${expectedCanonical}`);
+    const ogImage = html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i)?.[1];
+    if (ogImage !== `${publicBase}og.png`) errors.push(`${label}: og:image ${ogImage || "отсутствует"}, ожидался ${publicBase}og.png`);
+    if (!/<link[^>]+rel="icon"/i.test(html)) errors.push(`${label}: отсутствует favicon`);
+    if (!/<link[^>]+rel="apple-touch-icon"/i.test(html)) errors.push(`${label}: отсутствует apple-touch-icon`);
   }
   if (!/<main[^>]+id="main-content"/i.test(html) && label !== "404.html") {
     errors.push(`${label}: отсутствует основная область main-content`);

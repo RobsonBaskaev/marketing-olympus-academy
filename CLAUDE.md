@@ -26,6 +26,10 @@ progress lives in the browser's `localStorage`; there is no server-side persiste
   - `pnpm test:business` → `scripts/test-business-diagnostic.mjs`
   - Run one directly, e.g. `node scripts/test-lesson-progress.mjs`, when iterating on a single `app/lib/*.mjs`
     module — no filtering flags exist since these aren't a jest/vitest suite.
+- `pnpm test:smoke` — browser smoke test (`scripts/test-smoke.mjs`): serves the built `dist/` and drives it
+  in headless Chromium (analytics funnel clamp, case rubric, 404 links, Pro form, service-worker cache).
+  Requires playwright (resolved from `NODE_PATH` or a global install); exits 0 with a SKIPPED message when
+  playwright is unavailable, so it is intentionally not part of `pnpm check`/CI.
 
 There is no lint script configured in `package.json`.
 
@@ -35,7 +39,7 @@ There is no lint script configured in `package.json`.
 
 Every top-level directory in `app/` (`research/`, `strategy/`, `acquisition/`, `analytics/`, `olympus/`,
 `learn/`, `diagnostic/`, `cases/`, `library/`, `business-diagnostic/`, `backup/`, `skills/`, `review/`,
-`start/`, `curriculum/`, `teams/`, `sources/`, `glossary/`, `methodology/`, `faq/`) is a Next.js route
+`start/`, `curriculum/`, `teams/`, `sources/`, `glossary/`, `methodology/`, `faq/`, `pro/`) is a Next.js route
 mapping 1:1 to a page on the site. `scripts/verify-site.mjs` hardcodes this route list (`requiredRoutes`)
 and fails the build if a route's exported HTML goes missing — update that list when adding/removing a route.
 
@@ -62,9 +66,17 @@ that style when editing existing files rather than reformatting them.
 There is no backend. Each module reads/writes its own namespaced `localStorage` key on mount/change
 (`olymp-progress`, `olymp-diagnostic`, `olymp-diagnostic-history`, `olymp-research`, `olymp-strategy`,
 `olymp-acquisition`, `olymp-analytics`, `olymp-case-lab`, `olymp-business-diagnostic`, `olymp-profile`,
-`olymp-mode`, `olymp-answers`, `olymp-coach-answer`, `olymp-capstone`). The `backup/` route aggregates all
+`olymp-mode`, `olymp-answers`, `olymp-coach-answer`, `olymp-capstone`, `olymp-pro-request`). The `backup/`
+route aggregates all
 of these keys for export/import so users can move progress between devices — when adding a new persisted
 key, wire it into the backup page's include list too (verify-site checks for a few of these explicitly).
+
+### Fonts are self-hosted
+
+Manrope and Playfair Display woff2 subsets live in `app/fonts/` and are declared via `@font-face` at the
+top of `app/globals.css` (relative `url("./fonts/...")` so Next bundles them with the correct asset
+prefix). Do not reintroduce a CSS `@import` of Google Fonts — verify-site fails on any
+`fonts.googleapis.com` reference in `globals.css`.
 
 ### Shared logic in `app/lib/*.mjs`
 
