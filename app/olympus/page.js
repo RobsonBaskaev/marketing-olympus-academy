@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
+import { evaluateOverallProgress, CAPSTONE_LIMITS } from "../lib/progress-rules.mjs";
 
 const safeParse = (key, fallback) => {
   try {
@@ -11,102 +11,65 @@ const safeParse = (key, fallback) => {
 };
 
 export default function Olympus() {
-  const [artifacts, setArtifacts] = useState({
-      answers: {},
-      research: {},
-      strategy: {},
-      acquisition: {},
-      analytics: {},
-      caseLab: { selected: {}, drafts: {} },
-    }),
-    [final, setFinal] = useState({ summary: "", risk: "", experiment: "" });
+  const [artifacts, setArtifacts] = useState(null),
+    [final, setFinal] = useState({ summary: "", risk: "", experiment: "" }),
+    [storageError, setStorageError] = useState(false);
   useEffect(() => {
     setArtifacts({
+      progress: safeParse("olymp-progress", []),
       answers: safeParse("olymp-answers", {}),
+      quiz: safeParse("olymp-quiz", null),
       research: safeParse("olymp-research", {}),
       strategy: safeParse("olymp-strategy", {}),
       acquisition: safeParse("olymp-acquisition", {}),
       analytics: safeParse("olymp-analytics", {}),
       caseLab: safeParse("olymp-case-lab", { selected: {}, drafts: {} }),
     });
-    setFinal(
-      safeParse("olymp-capstone", { summary: "", risk: "", experiment: "" }),
-    );
+    const savedFinal = safeParse("olymp-capstone", {});
+    setFinal({
+      summary: String(savedFinal.summary || ""),
+      risk: String(savedFinal.risk || ""),
+      experiment: String(savedFinal.experiment || ""),
+    });
   }, []);
   const update = (k, v) => {
     const next = { ...final, [k]: v };
     setFinal(next);
-    localStorage.setItem("olymp-capstone", JSON.stringify(next));
+    try {
+      localStorage.setItem("olymp-capstone", JSON.stringify(next));
+      setStorageError(false);
+    } catch {
+      setStorageError(true);
+    }
   };
-  const foundationCount = Object.values(artifacts.answers).filter(
-      (v) => String(v || "").trim().length >= 30,
-    ).length,
-    researchCount = Object.values(artifacts.research).filter(
-      (v) => String(v || "").trim().length > 15,
-    ).length,
-    strategyReady =
-      (artifacts.strategy.answers || []).filter(
-        (x) => x !== null && x !== undefined,
-      ).length === 4,
-    acqReady =
-      Boolean(artifacts.acquisition.money) &&
-      Object.values(artifacts.acquisition.money).reduce(
-        (a, b) => a + Number(b || 0),
-        0,
-      ) === 300000,
-    analyticsReady =
-      artifacts.analytics.data && Number(artifacts.analytics.data.sales) > 0,
-    caseCount = Object.keys(artifacts.caseLab.selected || {}).filter(
-      (id) => String(artifacts.caseLab.drafts?.[id] || "").trim().length >= 80,
-    ).length,
-    strongCaseCount = Object.keys(artifacts.caseLab.drafts || {}).filter(
-      (id) => evaluateCaseAnswer(artifacts.caseLab.drafts[id]).ready && evaluateCaseAnswer(artifacts.caseLab.drafts[id]).score >= 4,
-    ).length;
-  const modules = [
-      {
-        n: "01",
-        name: "Фундамент",
-        ready: foundationCount >= 3,
-        detail: `${foundationCount}/5 работ`,
-      },
-      {
-        n: "02",
-        name: "Исследования",
-        ready: researchCount >= 6,
-        detail: `${researchCount}/8 полей`,
-      },
-      {
-        n: "03",
-        name: "Стратегия",
-        ready: strategyReady,
-        detail: strategyReady ? "4 решения" : "Нужны 4 решения",
-      },
-      {
-        n: "04",
-        name: "Привлечение",
-        ready: acqReady,
-        detail: acqReady
-          ? "300 000 ₽ распределено"
-          : "Распределите весь бюджет",
-      },
-      {
-        n: "05",
-        name: "Аналитика",
-        ready: analyticsReady,
-        detail: analyticsReady ? "Воронка сохранена" : "Нет воронки",
-      },
-      {
-        n: "P",
-        name: "Практикум кейсов",
-        ready: strongCaseCount >= 1,
-        detail: `${strongCaseCount}/4 кейса подтверждено структурой`,
-      },
+  // Статусы модулей считаются едиными правилами из progress-rules.mjs —
+  // те же, что в учебном кабинете и на карте компетенций.
+  const overall = evaluateOverallProgress({ ...(artifacts || {}), capstone: final }),
+    moduleOrder = [
+      ["01", "Фундамент", "foundation"],
+      ["02", "Исследования", "research"],
+      ["03", "Стратегия", "strategy"],
+      ["04", "Привлечение", "acquisition"],
+      ["05", "Аналитика", "analytics"],
+      ["P", "Практикум кейсов", "cases"],
     ],
+    modules = moduleOrder.map(([n, name, key]) => {
+      const rules = overall.modules[key];
+      const caseCount = rules.details[0]?.detail || "";
+      return {
+        n,
+        name,
+        ready: rules.completed,
+        detail: rules.completed
+          ? caseCount || "Все требования выполнены"
+          : `${caseCount ? `${caseCount} · ` : ""}далее: ${rules.missingRequirements[0] || ""}`,
+      };
+    }),
     readyCount = modules.filter((x) => x.ready).length,
     defence = [
-      final.summary.length >= 180,
-      final.risk.length >= 80,
-      final.experiment.length >= 120,
+      final.summary.length >= CAPSTONE_LIMITS.summary,
+      final.risk.length >= CAPSTONE_LIMITS.risk,
+      final.experiment.length >= CAPSTONE_LIMITS.experiment,
     ],
     total = readyCount + defence.filter(Boolean).length;
   const exportDossier = () => {
@@ -124,12 +87,9 @@ export default function Olympus() {
         final.experiment || "—",
         "",
         "АРТЕФАКТЫ ОБУЧЕНИЯ",
-        `Работы фундамента: ${foundationCount}`,
-        `Поля исследования: ${researchCount}`,
-        `Стратегия: ${strategyReady ? "собрана" : "не завершена"}`,
-        `Медиаплан: ${acqReady ? "собран" : "не завершён"}`,
-        `Аналитика: ${analyticsReady ? "собрана" : "не завершена"}`,
-        `Практикум: ${strongCaseCount}/4 структурных кейса (${caseCount}/4 написано)`,
+        ...modules.map(
+          (m) => `${m.name}: ${m.ready ? "завершён" : "не завершён"} (${m.detail})`,
+        ),
         "",
         "Черновые данные проекта",
         JSON.stringify(artifacts, null, 2),
@@ -157,6 +117,15 @@ export default function Olympus() {
           <span>готовность к защите</span>
         </div>
       </header>
+      {storageError && (
+        <div className="storage-warning" role="alert">
+          <b>Не удалось сохранить ответ</b>
+          <span>
+            Хранилище браузера недоступно. Скопируйте текст защиты, чтобы не
+            потерять его.
+          </span>
+        </div>
+      )}
       <section className="readiness">
         <div className="sectionhead">
           <div>

@@ -24,6 +24,7 @@ progress lives in the browser's `localStorage`; there is no server-side persiste
   - `pnpm test:progress` → `scripts/test-lesson-progress.mjs`
   - `pnpm test:analytics` → `scripts/test-analytics-validation.mjs`
   - `pnpm test:business` → `scripts/test-business-diagnostic.mjs`
+  - `pnpm test:rules` → `scripts/test-progress-rules.mjs` (unified module-completion rules + localStorage migrations)
   - Run one directly, e.g. `node scripts/test-lesson-progress.mjs`, when iterating on a single `app/lib/*.mjs`
     module — no filtering flags exist since these aren't a jest/vitest suite.
 - `pnpm test:smoke` — browser smoke test (`scripts/test-smoke.mjs`): serves the built `dist/` and drives it
@@ -66,8 +67,8 @@ that style when editing existing files rather than reformatting them.
 There is no backend. Each module reads/writes its own namespaced `localStorage` key on mount/change
 (`olymp-progress`, `olymp-diagnostic`, `olymp-diagnostic-history`, `olymp-research`, `olymp-strategy`,
 `olymp-acquisition`, `olymp-analytics`, `olymp-case-lab`, `olymp-business-diagnostic`, `olymp-profile`,
-`olymp-mode`, `olymp-answers`, `olymp-coach-answer`, `olymp-capstone`, `olymp-pro-request`). The `backup/`
-route aggregates all
+`olymp-mode`, `olymp-answers`, `olymp-coach-answer`, `olymp-capstone`, `olymp-quiz`,
+`olymp-trainer-answers`, `olymp-pro-request`). The `backup/` route aggregates all
 of these keys for export/import so users can move progress between devices — when adding a new persisted
 key, wire it into the backup page's include list too (verify-site checks for a few of these explicitly).
 
@@ -84,6 +85,11 @@ Pure, framework-free helper modules used by both the client components and the `
 scripts (imported with relative `../app/lib/...` paths):
 - `lesson-progress.mjs` — completion reconciliation (`reconcileCompletedLessons`, `nextIncompleteLesson`,
   `MIN_LESSON_ANSWER`) for the home-page lesson flow.
+- `progress-rules.mjs` — the single source of truth for module-completion rules (`evaluate*Progress`
+  functions returning a unified `{status, completed, percent, score, maxScore, requirements, …}` shape)
+  plus `migrate*` helpers that read old localStorage formats without dropping data. The home page,
+  `learn/`, `skills/`, `olympus/` and the module pages must all derive statuses from here — verify-site
+  fails if any of them re-implements completion rules locally.
 - `case-rubric.mjs`, `analytics-validation.mjs`, `business-diagnostic.mjs` — evaluation/validation logic
   for their respective modules (case answers, funnel/analytics math, business diagnostic scoring).
 - `seo.mjs` — `SITE_URL`, `canonicalUrl`, `routeMetadata` shared by every route's metadata export.

@@ -5,6 +5,7 @@ import {
   nextIncompleteLesson,
   reconcileCompletedLessons,
 } from "./lib/lesson-progress.mjs";
+import { migrateTrainerAnswers, QUIZ_TOTAL } from "./lib/progress-rules.mjs";
 
 const lessons = [
   {
@@ -124,14 +125,42 @@ const cases = [
 function CaseTrainer() {
   const [index, setIndex] = useState(0),
     [choice, setChoice] = useState(null),
-    [free, setFree] = useState(""),
+    [answers, setAnswers] = useState({}),
     [hint, setHint] = useState(false),
-    [sample, setSample] = useState(false);
+    [sample, setSample] = useState(false),
+    [storageError, setStorageError] = useState(false);
+  useEffect(() => {
+    try {
+      setAnswers(
+        migrateTrainerAnswers(
+          JSON.parse(localStorage.getItem("olymp-trainer-answers") || "null"),
+        ).answers,
+      );
+    } catch {}
+  }, []);
+  const free = answers[index] || "";
+  const setFree = (value) => {
+    const nextAnswers = { ...answers, [index]: value };
+    setAnswers(nextAnswers);
+    try {
+      localStorage.setItem(
+        "olymp-trainer-answers",
+        JSON.stringify({ v: 1, answers: nextAnswers }),
+      );
+      setStorageError(false);
+    } catch {
+      setStorageError(true);
+    }
+  };
+  const clearAnswer = () => {
+    if (!free.trim()) return;
+    if (!window.confirm("Очистить ответ для этого кейса? Действие нельзя отменить.")) return;
+    setFree("");
+  };
   const c = cases[index],
     next = () => {
       setIndex((index + 1) % 3);
       setChoice(null);
-      setFree("");
       setHint(false);
       setSample(false);
     };
@@ -185,6 +214,17 @@ function CaseTrainer() {
             onChange={(e) => setFree(e.target.value)}
             placeholder="Мой первый шаг, данные и гипотезы…"
           />
+          <div className="free-answer-meta">
+            <span>Ответ сохраняется отдельно для каждого кейса</span>
+            <button type="button" className="clear-answer" disabled={!free.trim()} onClick={clearAnswer}>
+              Очистить ответ
+            </button>
+          </div>
+          {storageError && (
+            <p className="storage-warning-inline" role="alert">
+              Не удалось сохранить ответ: хранилище браузера недоступно. Скопируйте текст, чтобы не потерять его.
+            </p>
+          )}
         </div>
         <button className="primary" onClick={() => setSample(!sample)}>
           {sample ? "Скрыть пример" : "Показать пример сильного ответа"}
@@ -311,9 +351,15 @@ function AnswerCoach() {
       setText(localStorage.getItem("olymp-coach-answer") || "");
     } catch {}
   }, []);
+  const [coachStorageError, setCoachStorageError] = useState(false);
   const update = (value) => {
     setText(value);
-    localStorage.setItem("olymp-coach-answer", value);
+    try {
+      localStorage.setItem("olymp-coach-answer", value);
+      setCoachStorageError(false);
+    } catch {
+      setCoachStorageError(true);
+    }
     setResult(null);
   };
   const check = () => {
@@ -373,6 +419,11 @@ function AnswerCoach() {
             placeholder="Опишите клиента, данные, гипотезы, план и метрику…"
           />
           <span>{text.length} символов · сохраняется автоматически</span>
+          {coachStorageError && (
+            <p className="storage-warning-inline" role="alert">
+              Не удалось сохранить ответ: скопируйте текст, чтобы не потерять его.
+            </p>
+          )}
           <button className="primary" onClick={check}>
             Проверить мой ответ →
           </button>
@@ -506,7 +557,26 @@ function LessonContent({
     answer = (i) => {
       const next = [...answers, i];
       setAnswers(next);
-      quiz < 2 ? setQuiz(quiz + 1) : setQuiz("done");
+      if (quiz < 2) {
+        setQuiz(quiz + 1);
+        return;
+      }
+      setQuiz("done");
+      try {
+        const finalScore = next.reduce(
+          (n, a, idx) => n + (a === test[idx]?.c ? 1 : 0),
+          0,
+        );
+        localStorage.setItem(
+          "olymp-quiz",
+          JSON.stringify({
+            v: 1,
+            score: finalScore,
+            total: QUIZ_TOTAL,
+            passedAt: new Date().toISOString(),
+          }),
+        );
+      } catch {}
     };
   if (quiz === "done")
     return (
