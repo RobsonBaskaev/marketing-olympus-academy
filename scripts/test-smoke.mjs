@@ -81,7 +81,16 @@ const homeHref = await page.locator(".not-found-page a:not(.primary)").getAttrib
 const homeResponse = await page.request.get(`${base}${homeHref}`);
 check(homeResponse.ok(), `404: ссылка «На главную» отвечает ${homeResponse.status()}`);
 
-// 5. Service worker устанавливается и наполняет офлайн-кэш на этом хосте.
+// 5. Страница Pro: заявка собирается и активирует кнопку отправки.
+await page.goto(`${base}/pro/`, { waitUntil: "load" });
+check((await page.locator(".pro-actions a.disabled").count()) === 1, "Pro: кнопка отправки должна быть неактивна для пустой формы");
+await page.locator(".pro-fields input").first().fill("Анна, маркетолог");
+await page.locator(".pro-fields input").nth(1).fill("онлайн-школа английского");
+await page.waitForTimeout(150);
+const mailto = await page.locator(".pro-actions a").getAttribute("href");
+check(mailto?.startsWith("mailto:") && mailto.includes(encodeURIComponent("Анна")), "Pro: письмо заявки не собирается из формы");
+
+// 6. Service worker устанавливается и наполняет офлайн-кэш на этом хосте.
 await page.goto(`${base}/`, { waitUntil: "load" });
 const swState = await page.evaluate(async () => {
   if (!("serviceWorker" in navigator)) return { supported: false };

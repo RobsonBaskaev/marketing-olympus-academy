@@ -23,6 +23,7 @@ import "./curriculum.css";
 import "./library.css";
 import "./teams.css";
 import "./business-diagnostic.css";
+import "./pro.css";
 import PWARegister from "./pwa-register";
 
 export const metadata = {

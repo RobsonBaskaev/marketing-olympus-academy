@@ -22,6 +22,7 @@ const requiredRoutes = [
   "analytics/index.html",
   "olympus/index.html",
   "backup/index.html",
+  "pro/index.html",
   "cases/index.html",
   "glossary/index.html",
   "methodology/index.html",
@@ -258,6 +259,15 @@ if (globalsCss.includes("fonts.googleapis.com") || !globalsCss.includes("@font-f
 if (!mainSource.includes("menu-toggle") || !globalsCss.includes(".navlinks.open")) {
   errors.push("Главная: на мобильной ширине нужно раскрывающееся меню навигации");
 }
+const proSource = readFileSync(join(root, "app", "pro", "pro-offer.js"), "utf8");
+for (const marker of ["olymp-pro-request", "РАННИЙ ДОСТУП · ОПЛАТА ПОКА НЕ ПОДКЛЮЧЕНА", "mailto:", "Заявка ни к чему не обязывает", "Честные границы"]) {
+  if (!proSource.includes(marker)) errors.push(`Страница Pro: отсутствует ${marker}`);
+}
+if (!backupSource.includes('"olymp-pro-request"')) errors.push("Резервная копия: не включена заявка на Pro");
+for (const [label, source] of [["Главная", mainSource], ["Диагностика бизнеса", businessDiagnosticSource], ["Пилот для команд", teamsSource]]) {
+  if (!source.includes('pro/"')) errors.push(`${label}: нет ссылки на страницу раннего доступа Pro`);
+}
+if (!sitemap.includes("/pro/")) errors.push("sitemap.xml: отсутствует страница pro");
 
 if (errors.length) {
   console.error(`Проверка сайта не пройдена (${errors.length}):`);
