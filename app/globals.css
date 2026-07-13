@@ -562,3 +562,136 @@ footer p {
   font-size: 12px;
   line-height: 1.45;
 }
+.library-product-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 26px;
+}
+.library-product-actions .primary {
+  padding: 14px 18px;
+  background: #d9ff43;
+  color: #111820;
+  text-decoration: none;
+  font-weight: 800;
+}
+.library-product-actions span {
+  color: #bac2c8;
+  font-size: 12px;
+}
+.method-visual {
+  margin: 0 0 24px;
+  padding: 18px;
+  background: #111820;
+  color: white;
+}
+.method-visual figcaption {
+  margin-bottom: 14px;
+  color: #d9ff43;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.method-visual > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.method-visual > div span {
+  min-width: 0;
+  position: relative;
+}
+.method-visual > div span:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 18px;
+  right: -17px;
+  color: #d9ff43;
+}
+.method-visual small {
+  display: block;
+  color: #9aa5ad;
+  font-size: 9px;
+}
+.method-visual b {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.method-visual > p {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #394047;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.method-visual i {
+  color: #d9ff43;
+  font-style: normal;
+  font-weight: 800;
+}
+.market-examples {
+  margin-top: 22px;
+  padding-top: 8px;
+}
+.market-examples article {
+  margin-top: 10px;
+  padding: 15px;
+  background: #f0eee7;
+}
+.market-examples article:nth-of-type(2) {
+  background: #eef6ff;
+}
+.market-examples article p {
+  margin: 7px 0 0;
+  line-height: 1.5;
+}
+.market-examples > small {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.method-sources {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+.method-sources a {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 8px;
+  color: #111820;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.method-sources a span {
+  color: #6657ef;
+  font-weight: 800;
+}
+@media (max-width: 520px) {
+  .library-product-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .method-visual > div {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .method-visual > div span {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #394047;
+  }
+  .method-visual > div span:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: 0;
+    bottom: -10px;
+  }
+}

@@ -14,6 +14,8 @@ const requiredRoutes = [
   "start/index.html",
   "curriculum/index.html",
   "library/index.html",
+  "business-diagnostic/index.html",
+  "teams/index.html",
   "research/index.html",
   "strategy/index.html",
   "acquisition/index.html",
@@ -124,6 +126,9 @@ const startSource = readFileSync(join(root, "app", "start", "start-planner.js"),
 const curriculumSource = readFileSync(join(root, "app", "curriculum", "page.js"), "utf8");
 const librarySource = readFileSync(join(root, "app", "library", "library-browser.js"), "utf8");
 const libraryMethodsSource = readFileSync(join(root, "app", "library", "methods.mjs"), "utf8");
+const businessDiagnosticSource = readFileSync(join(root, "app", "business-diagnostic", "planner.js"), "utf8");
+const businessDiagnosticLogic = readFileSync(join(root, "app", "lib", "business-diagnostic.mjs"), "utf8");
+const teamsSource = readFileSync(join(root, "app", "teams", "page.js"), "utf8");
 const sourcesSource = readFileSync(join(root, "app", "sources", "page.js"), "utf8");
 const pagesWorkflow = readFileSync(join(root, ".github", "workflows", "pages.yml"), "utf8");
 const lessonProgressSource = readFileSync(join(root, "app", "lib", "lesson-progress.mjs"), "utf8");
@@ -211,10 +216,23 @@ for (const marker of ["12", "РЕЗУЛЬТАТЫ ПРОГРАММЫ", "Кейс
 for (const marker of ["Что нужно решить?", "Все уровни", "methodCategories", "Типичная ошибка", "Сбросить фильтры"]) {
   if (!librarySource.includes(marker) && !libraryMethodsSource.includes(marker)) errors.push(`Библиотека методов: отсутствует ${marker}`);
 }
-if ((libraryMethodsSource.match(/title:/g) || []).length < 20) {
-  errors.push("Библиотека методов: должно быть не менее 20 практических методов");
+if ((libraryMethodsSource.match(/title:/g) || []).length < 28) {
+  errors.push("Библиотека методов: должно быть не менее 28 практических методов");
 }
-for (const marker of ["Marketing Management: Analytics, Frameworks, and Applications", "New Enterprises", "Marketing Strategy"]) {
+for (const marker of ["MethodVisual", "Визуальная инструкция", "Примеры применения в бизнесе", "Россия · учебный сценарий", "США · учебный сценарий", "methodSources"]) {
+  if (!librarySource.includes(marker) && !libraryMethodsSource.includes(marker)) errors.push(`Визуальная библиотека: отсутствует ${marker}`);
+}
+if ((libraryMethodsSource.match(/ru:"/g) || []).length !== 28 || (libraryMethodsSource.match(/us:"/g) || []).length !== 28) {
+  errors.push("Библиотека: каждому из 28 методов нужны примеры РФ и США");
+}
+for (const marker of ["buildBusinessMethodPlans", "businessProfileReady", "28 инструментов", "olymp-business-diagnostic", "Оплата пока не подключена"]) {
+  if (!businessDiagnosticSource.includes(marker) && !businessDiagnosticLogic.includes(marker)) errors.push(`Диагностика бизнеса: отсутствует ${marker}`);
+}
+for (const marker of ["ПИЛОТНАЯ МЕТОДИЧКА", "ДОСТУПНО СЕЙЧАС", "ТРЕБУЕТ СЕРВЕРНОЙ ВЕРСИИ", "СЦЕНАРИЙ КЕЙС-СЕМИНАРА", "КАК ОЦЕНИТЬ ПИЛОТ"]) {
+  if (!teamsSource.includes(marker)) errors.push(`Пилот для команд: отсутствует ${marker}`);
+}
+if (!backupSource.includes('"olymp-business-diagnostic"')) errors.push("Резервная копия: не включён профиль диагностики бизнеса");
+for (const marker of ["Marketing Management: Analytics, Frameworks, and Applications", "New Enterprises", "Marketing Strategy", "Высшая школа экономики", "U.S. Small Business Administration", "Корпорация «МСП»", "Роскомнадзор"]) {
   if (!sourcesSource.includes(marker)) errors.push(`Карта источников: отсутствует ${marker}`);
 }
 for (const marker of ["actions/checkout@v6", "pnpm/action-setup@v6", "actions/setup-node@v6", "node-version: 24"]) {

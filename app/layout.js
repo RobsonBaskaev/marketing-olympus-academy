@@ -21,6 +21,8 @@ import "./review.css";
 import "./start.css";
 import "./curriculum.css";
 import "./library.css";
+import "./teams.css";
+import "./business-diagnostic.css";
 import PWARegister from "./pwa-register";
 
 export const metadata = {

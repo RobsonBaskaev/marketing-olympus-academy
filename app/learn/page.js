@@ -222,6 +222,8 @@ export default function Learn() {
           <a href="../review/">Разобрать письменный кейс</a>
           <a href="../curriculum/">Академическая программа</a>
           <a href="../library/">Библиотека методов</a>
+          <a href="../business-diagnostic/">Диагностика бизнеса</a>
+          <a href="../teams/">Пилот для команды или вуза</a>
         </div>
       </section>
       <section className="next-step">

@@ -880,7 +880,8 @@ export default function Page() {
           <a href="diagnostic/">Диагностика</a> ·{" "}
           <a href="skills/">Компетенции</a> ·{" "}
           <a href="review/">Разбор кейса</a> ·{" "}
-          <a href="curriculum/">Академическая программа</a>
+          <a href="curriculum/">Академическая программа</a> ·{" "}
+          <a href="teams/">Для компаний и университетов</a>
           <br />
           <a href="research/">02 Исследования</a> ·{" "}
           <a href="strategy/">03 Стратегия</a> ·{" "}
@@ -888,7 +889,7 @@ export default function Page() {
           <a href="analytics/">05 Аналитика</a> ·{" "}
           <a href="olympus/">06 Олимп</a>
           <br />
-          <a href="library/">Библиотека методов</a> · <a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> ·{" "}
+          <a href="library/">Библиотека методов</a> · <a href="business-diagnostic/">Диагностика бизнеса</a> · <a href="glossary/">Словарь</a> · <a href="cases/">Кейсы</a> ·{" "}
           <a href="methodology/">Методология</a> ·{" "}
           <a href="sources/">Источники</a> · <a href="faq/">FAQ</a>
         </p>

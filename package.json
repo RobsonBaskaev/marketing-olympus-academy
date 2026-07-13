@@ -9,7 +9,8 @@
     "test:rubric": "node scripts/test-case-rubric.mjs",
     "test:progress": "node scripts/test-lesson-progress.mjs",
     "test:analytics": "node scripts/test-analytics-validation.mjs",
-    "check": "pnpm build && pnpm verify && pnpm test:rubric && pnpm test:progress && pnpm test:analytics",
+    "test:business": "node scripts/test-business-diagnostic.mjs",
+    "check": "pnpm build && pnpm verify && pnpm test:rubric && pnpm test:progress && pnpm test:analytics && pnpm test:business",
     "start": "next start"
   },
   "dependencies": {
