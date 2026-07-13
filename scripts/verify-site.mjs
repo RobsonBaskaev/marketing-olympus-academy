@@ -238,6 +238,26 @@ for (const marker of ["Marketing Management: Analytics, Frameworks, and Applicat
 for (const marker of ["actions/checkout@v6", "pnpm/action-setup@v6", "actions/setup-node@v6", "node-version: 24"]) {
   if (!pagesWorkflow.includes(marker)) errors.push(`GitHub Pages workflow: отсутствует ${marker}`);
 }
+if (serviceWorker.includes('"/marketing-olympus-academy"') || !serviceWorker.includes("registration.scope")) {
+  errors.push("sw.js: базовый путь должен вычисляться из registration.scope, а не задаваться жёстко");
+}
+const notFoundSource = readFileSync(join(root, "app", "not-found.js"), "utf8");
+if (!notFoundSource.includes("github.io")) {
+  errors.push("Страница 404: ссылки восстановления должны учитывать хост (github.io против локального запуска)");
+}
+if (!analyticsSource.includes("Math.min(100")) {
+  errors.push("Аналитика: ширина баров воронки должна быть ограничена сверху (Math.min)");
+}
+if (!caseLabSource.includes("evaluateCaseAnswer") || !caseLabSource.includes('href="../review/"')) {
+  errors.push("Практикум кейсов: нужна рубрика evaluateCaseAnswer и ссылка на детальный разбор /review/");
+}
+const globalsCss = readFileSync(join(root, "app", "globals.css"), "utf8");
+if (globalsCss.includes("fonts.googleapis.com") || !globalsCss.includes("@font-face")) {
+  errors.push("Шрифты должны быть локальными (@font-face), без блокирующего запроса к fonts.googleapis.com");
+}
+if (!mainSource.includes("menu-toggle") || !globalsCss.includes(".navlinks.open")) {
+  errors.push("Главная: на мобильной ширине нужно раскрывающееся меню навигации");
+}
 
 if (errors.length) {
   console.error(`Проверка сайта не пройдена (${errors.length}):`);

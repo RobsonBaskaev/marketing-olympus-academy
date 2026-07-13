@@ -1,4 +1,12 @@
+"use client";
+import { useEffect, useState } from "react";
+
 export default function NotFound() {
+  // Пререндер использует путь GitHub Pages; на других хостах базовый путь корректируется после гидрации.
+  const [base, setBase] = useState("/marketing-olympus-academy");
+  useEffect(() => {
+    if (!window.location.hostname.endsWith("github.io")) setBase("");
+  }, []);
   return (
     <main id="main-content" className="not-found-page">
       <small>ОШИБКА 404</small>
@@ -8,10 +16,10 @@ export default function NotFound() {
         пострадал.
       </p>
       <div>
-        <a className="primary" href="/marketing-olympus-academy/learn/">
+        <a className="primary" href={`${base}/learn/`}>
           Продолжить обучение →
         </a>
-        <a href="/marketing-olympus-academy/">На главную</a>
+        <a href={`${base}/`}>На главную</a>
       </div>
     </main>
   );
