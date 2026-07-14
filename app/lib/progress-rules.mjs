@@ -4,8 +4,8 @@ import { reconcileCompletedLessons } from "./lesson-progress.mjs";
 
 export const PROGRESS_DATA_VERSION = 2;
 export const LESSON_COUNT = 5;
-export const QUIZ_PASS_SCORE = 2;
-export const QUIZ_TOTAL = 3;
+export const QUIZ_PASS_RATIO = 2 / 3;
+export const QUIZ_LEGACY_TOTAL = 3;
 export const RESEARCH_FIELDS = ["decision", "problem", "audience", "exclude", "hypotheses", "signals", "questions", "output"];
 export const RESEARCH_MIN_FIELDS = 6;
 export const CASE_IDS = ["coffee", "store", "saas", "b2b"];
@@ -73,7 +73,13 @@ export function migrateQuiz(raw) {
   if (!raw || typeof raw !== "object") return null;
   const score = Number(raw.score);
   if (!Number.isFinite(score)) return null;
-  return { v: raw.v || 1, score, total: Number(raw.total) || QUIZ_TOTAL, passedAt: raw.passedAt ?? null };
+  // Записи без total сделаны старой версией теста из трёх вопросов.
+  return { v: raw.v || 1, score, total: Number(raw.total) || QUIZ_LEGACY_TOTAL, passedAt: raw.passedAt ?? null };
+}
+
+export function isQuizPassed(raw) {
+  const quiz = migrateQuiz(raw);
+  return Boolean(quiz && quiz.total > 0 && quiz.score >= Math.ceil(quiz.total * QUIZ_PASS_RATIO));
 }
 
 export function migrateTrainerAnswers(raw) {
@@ -108,7 +114,7 @@ function buildResult(requirements, { started = false, details = [] } = {}) {
 export function evaluateFoundationProgress({ progress = [], answers = {}, quiz = null } = {}) {
   const validLessons = reconcileCompletedLessons(progress, answers, LESSON_COUNT);
   const quizState = migrateQuiz(quiz);
-  const quizPassed = Boolean(quizState && quizState.score >= QUIZ_PASS_SCORE);
+  const quizPassed = isQuizPassed(quiz);
   const requirements = [
     { name: "Выполнены все 5 уроков с осмысленными ответами", ok: validLessons.length === LESSON_COUNT, detail: `${validLessons.length}/${LESSON_COUNT} работ` },
     { name: "Пройден итоговый тест", ok: quizPassed, detail: quizState ? `${quizState.score}/${quizState.total}` : "тест не сдавался" },

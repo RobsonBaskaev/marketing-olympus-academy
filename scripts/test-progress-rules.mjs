@@ -15,6 +15,7 @@ import {
   migrateAnalytics,
   migrateQuiz,
   migrateTrainerAnswers,
+  isQuizPassed,
 } from "../app/lib/progress-rules.mjs";
 
 const longAnswer = "Клиент — офисный сотрудник утром; ему нужен быстрый напиток по дороге на работу.";
@@ -131,7 +132,14 @@ assert.equal(migrateAnalytics(oldAnalytics).note, goodNote);
 
 assert.equal(migrateQuiz(null), null);
 assert.equal(migrateQuiz({ score: 2 }).score, 2);
+assert.equal(migrateQuiz({ score: 2 }).total, 3, "запись без total считается старым тестом из 3 вопросов");
 assert.equal(migrateQuiz({ score: "нет" }), null);
+assert.equal(isQuizPassed({ score: 2 }), true, "старый результат 2/3 остаётся проходным");
+assert.equal(isQuizPassed({ score: 1, total: 3 }), false);
+assert.equal(isQuizPassed({ score: 6, total: 8 }), true, "новый тест из 8 вопросов проходится с 6 правильными");
+assert.equal(isQuizPassed({ score: 5, total: 8 }), false);
+assert.equal(evaluateFoundationProgress({ progress: [0, 1, 2, 3, 4], answers: notes, quiz: { score: 6, total: 8 } }).completed, true);
+assert.equal(evaluateFoundationProgress({ progress: [0, 1, 2, 3, 4], answers: notes, quiz: { score: 5, total: 8 } }).completed, false);
 
 const legacyTrainer = migrateTrainerAnswers("мой старый ответ");
 assert.equal(legacyTrainer.answers[0], "мой старый ответ", "строковый формат тренажёра мигрирует без потери");

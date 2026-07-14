@@ -5,7 +5,7 @@ import {
   nextIncompleteLesson,
   reconcileCompletedLessons,
 } from "./lib/lesson-progress.mjs";
-import { migrateTrainerAnswers, QUIZ_TOTAL } from "./lib/progress-rules.mjs";
+import { migrateTrainerAnswers, migrateQuiz, isQuizPassed } from "./lib/progress-rules.mjs";
 
 const lessons = [
   {
@@ -249,6 +249,19 @@ const test = [
     q: "С чего начинается маркетинг?",
     o: ["С рекламы", "С понимания клиента и задачи", "С логотипа"],
     c: 1,
+    why: "Урок 1: реклама и логотип — инструменты. Основа — задача клиента, ради которой он готов платить.",
+  },
+  {
+    q: "Что на самом деле покупает клиент?",
+    o: ["Продукт и его характеристики", "Результат и решение своей задачи", "Самую низкую цену"],
+    c: 1,
+    why: "Урок 1: клиент платит за результат — характеристики лишь способ его получить.",
+  },
+  {
+    q: "Что доказывает существование рынка?",
+    o: ["Большая аудитория в соцсетях", "Общая задача, выбор решений и готовность платить", "Красивая статистика отрасли"],
+    c: 1,
+    why: "Урок 2: без готовности обменять ресурсы на результат большая аудитория — ещё не рынок.",
   },
   {
     q: "Какой сегмент полезнее?",
@@ -258,13 +271,34 @@ const test = [
       "Все подписчики",
     ],
     c: 1,
+    why: "Урок 3: сегмент объединяет похожая задача и критерии выбора, а не демография.",
+  },
+  {
+    q: "Хороший сегмент должен быть…",
+    o: ["Максимально широким", "Различимым и доступным", "Просто платёжеспособным"],
+    c: 1,
+    why: "Урок 3: сегмент, который нельзя отличить от других и до которого нельзя дотянуться, невозможно обслужить предложением.",
+  },
+  {
+    q: "Сильное ценностное предложение обязательно содержит…",
+    o: ["Список всех функций продукта", "Сегмент, значимый результат и доказательство", "Слоган и скидку"],
+    c: 1,
+    why: "Урок 4: формула — для кого продукт, какой результат он даёт и почему в это можно поверить.",
+  },
+  {
+    q: "Позиционирование — это…",
+    o: ["Место продукта в сознании аудитории относительно альтернатив", "Дизайн упаковки и фирменный стиль", "Частота показов рекламы"],
+    c: 0,
+    why: "Урок 5: позиция живёт в голове клиента и подтверждается его собственным опытом.",
   },
   {
     q: "Что подтверждает ценность?",
     o: ["Поведение клиентов и данные", "Мнение команды", "Красивый слоган"],
     c: 0,
+    why: "Урок 5: только наблюдаемое поведение и цифры доказывают, что ценность реальна, а позиция занята.",
   },
 ];
+const QUIZ_PASS = Math.ceil(test.length * 2 / 3);
 const examples = [
   "Слабый ответ: «Кофе помогает проснуться». Сильнее: «Для офисного сотрудника кофейня даёт быстрый привычный ритуал и место переключиться за 10 минут».",
   "Пример: не «рынок кофе», а «люди рядом с офисным кварталом, которым утром нужен быстрый напиток по дороге на работу».",
@@ -551,61 +585,103 @@ function LessonContent({
   setQuiz,
   answers,
   setAnswers,
+  onQuizSaved,
 }) {
   const item = lessons[lesson],
     score = answers.reduce((n, a, i) => n + (a === test[i]?.c ? 1 : 0), 0),
     answer = (i) => {
       const next = [...answers, i];
       setAnswers(next);
-      if (quiz < 2) {
+      if (quiz < test.length - 1) {
         setQuiz(quiz + 1);
         return;
       }
       setQuiz("done");
+      const finalScore = next.reduce(
+        (n, a, idx) => n + (a === test[idx]?.c ? 1 : 0),
+        0,
+      );
+      const payload = {
+        v: 1,
+        score: finalScore,
+        total: test.length,
+        passedAt: new Date().toISOString(),
+      };
       try {
-        const finalScore = next.reduce(
-          (n, a, idx) => n + (a === test[idx]?.c ? 1 : 0),
-          0,
-        );
-        localStorage.setItem(
-          "olymp-quiz",
-          JSON.stringify({
-            v: 1,
-            score: finalScore,
-            total: QUIZ_TOTAL,
-            passedAt: new Date().toISOString(),
-          }),
-        );
+        localStorage.setItem("olymp-quiz", JSON.stringify(payload));
       } catch {}
+      onQuizSaved?.(payload);
+    },
+    retake = () => {
+      setQuiz(0);
+      setAnswers([]);
     };
-  if (quiz === "done")
+  if (quiz === "done") {
+    const passed = score >= QUIZ_PASS,
+      percent = Math.round((score / test.length) * 100);
     return (
       <div className="quiz-result">
-        <small>МОДУЛЬ ЗАВЕРШЁН</small>
-        <div>{score}/3</div>
-        <h1>{score === 3 ? "Отличный фундамент" : "Хорошее начало"}</h1>
+        <small>{passed ? "МОДУЛЬ ЗАВЕРШЁН" : "ТЕСТ НЕ СДАН"}</small>
+        <div>
+          {score}/{test.length}
+        </div>
+        <h1>
+          {score === test.length
+            ? "Отличный результат"
+            : passed
+              ? "Фундамент собран"
+              : "Стоит повторить уроки"}
+        </h1>
         <p>
-          {score === 3
-            ? "Вы готовы переходить к исследованиям."
-            : "Повторите уроки и попробуйте ещё раз."}
+          Правильных ответов: {percent}%.{" "}
+          {passed
+            ? "Следующий шаг — модуль 02: соберите бриф маркетингового исследования."
+            : `Для завершения модуля нужно минимум ${QUIZ_PASS} из ${test.length}. Пересмотрите уроки — разбор ошибок ниже.`}
         </p>
-        <button
-          className="primary"
-          onClick={() => {
-            setQuiz(0);
-            setAnswers([]);
-          }}
-        >
-          Пройти ещё раз
-        </button>
+        <div className="quiz-actions">
+          {passed ? (
+            <>
+              <a className="primary" href="research/">
+                Перейти к исследованиям →
+              </a>
+              <button onClick={retake}>Пройти ещё раз</button>
+            </>
+          ) : (
+            <>
+              <button className="primary" onClick={retake}>
+                Пройти ещё раз
+              </button>
+              <a href="research/">Посмотреть модуль исследований →</a>
+            </>
+          )}
+        </div>
+        <div className="quiz-review">
+          <b>Разбор ответов</b>
+          {test.map((t, i) => {
+            const ok = answers[i] === t.c;
+            return (
+              <article className={ok ? "ok" : ""} key={t.q}>
+                <b>
+                  {ok ? "✓" : "✗"} {t.q}
+                </b>
+                <span>
+                  {ok ? "Верно." : `Верный ответ: ${t.o[t.c]}.`} {t.why}
+                </span>
+              </article>
+            );
+          })}
+        </div>
       </div>
     );
+  }
   if (quiz !== null)
     return (
       <div className="quiz-page">
-        <small>ИТОГОВЫЙ ТЕСТ · {quiz + 1}/3</small>
+        <small>
+          ИТОГОВЫЙ ТЕСТ · {quiz + 1}/{test.length}
+        </small>
         <div className="progress">
-          <i style={{ width: `${((quiz + 1) / 3) * 100}%` }} />
+          <i style={{ width: `${((quiz + 1) / test.length) * 100}%` }} />
         </div>
         <h1>{test[quiz].q}</h1>
         <div className="options">
@@ -675,7 +751,8 @@ export default function Page() {
     [error, setError] = useState(""),
     [mode, setMode] = useState("beginner"),
     [quiz, setQuiz] = useState(null),
-    [answers, setAnswers] = useState([]);
+    [answers, setAnswers] = useState([]),
+    [quizResult, setQuizResult] = useState(null);
   useEffect(() => {
     try {
       const savedDone = JSON.parse(
@@ -695,6 +772,9 @@ export default function Page() {
         localStorage.setItem("olymp-progress", JSON.stringify(validDone));
       }
       setMode(localStorage.getItem("olymp-mode") || "beginner");
+      setQuizResult(
+        migrateQuiz(JSON.parse(localStorage.getItem("olymp-quiz") || "null")),
+      );
     } catch {}
   }, []);
   useEffect(() => {
@@ -899,12 +979,19 @@ export default function Page() {
             </div>
             <h3>
               {done.length === lessons.length
-                ? "Фундамент завершён"
+                ? isQuizPassed(quizResult)
+                  ? "Фундамент завершён"
+                  : "Остался итоговый тест"
                 : done.length
                   ? "Продолжайте с места остановки"
                   : "Начните с основ"}
             </h3>
-            <p>{done.length} из 5 уроков завершено</p>
+            <p>
+              {done.length} из 5 уроков завершено
+              {quizResult
+                ? ` · тест ${quizResult.score}/${quizResult.total}`
+                : ""}
+            </p>
             <button className="primary" onClick={openRecommendedLesson}>
               {done.length === lessons.length
                 ? "Повторить уроки →"
@@ -912,6 +999,11 @@ export default function Page() {
                   ? "Продолжить →"
                   : "Начать модуль →"}
             </button>
+            {done.length === lessons.length && isQuizPassed(quizResult) && (
+              <a className="module-next-link" href="research/">
+                Перейти к исследованиям →
+              </a>
+            )}
           </div>
           <div className="lesson-list">
             {lessons.map((x, i) => (
@@ -1053,7 +1145,9 @@ export default function Page() {
               <span>★</span>
               {done.length < lessons.length
                 ? "Итоговый тест · после 5 работ"
-                : "Итоговый тест"}
+                : quizResult
+                  ? `Итоговый тест · ${quizResult.score}/${quizResult.total}`
+                  : "Итоговый тест"}
             </button>
           </aside>
           <section className="lesson-page">
@@ -1069,6 +1163,7 @@ export default function Page() {
               setQuiz={setQuiz}
               answers={answers}
               setAnswers={setAnswers}
+              onQuizSaved={setQuizResult}
             />
           </section>
         </div>

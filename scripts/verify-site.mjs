@@ -159,6 +159,12 @@ for (const marker of ['href="research/"', 'href="strategy/"', 'href="acquisition
 if (!mainSource.includes("disabled={done.length < lessons.length}")) {
   errors.push("Итоговый тест не заблокирован до завершения пяти работ");
 }
+if ((mainSource.match(/why: "/g) || []).length < 8) {
+  errors.push("Итоговый тест: должно быть не менее 8 вопросов с объяснениями");
+}
+for (const marker of ["Перейти к исследованиям", "quiz-review", "Разбор ответов", "isQuizPassed"]) {
+  if (!mainSource.includes(marker)) errors.push(`Итоговый тест: отсутствует ${marker}`);
+}
 for (const [label, source] of [["Стратегия", strategySource], ["Медиаплан", acquisitionSource]]) {
   for (const marker of ["evaluateCaseAnswer", "rationaleStrong", "quality-feedback"]) {
     if (!source.includes(marker)) errors.push(`${label}: отсутствует доказательная проверка ${marker}`);
