@@ -1,7 +1,7 @@
 // Браузерный дымовой тест: собранный сайт (dist/) открывается в headless Chromium,
 // проверяются сценарии, которые статический verify-site.mjs не может увидеть.
 // Запуск: pnpm build && pnpm test:smoke. Требует playwright (локально или глобально);
-// если playwright недоступен, тест явно помечается как пропущенный.
+// playwright входит в devDependencies: отсутствие браузерного раннера является ошибкой проверки.
 import { createServer } from "node:http";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, resolve, extname } from "node:path";
@@ -22,14 +22,15 @@ try {
     const require = createRequire(import.meta.url);
     ({ chromium } = require(require.resolve("playwright", { paths: [process.env.NODE_PATH || "", "/opt/node22/lib/node_modules"].filter(Boolean) })));
   } catch {
-    console.log("SMOKE SKIPPED: playwright не установлен. Установите playwright, чтобы выполнить браузерный тест.");
-    process.exit(0);
+    console.error("SMOKE FAILED: playwright не установлен.");
+    process.exit(1);
   }
 }
 
 const mime = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript", ".svg": "image/svg+xml", ".json": "application/json", ".webmanifest": "application/manifest+json", ".woff2": "font/woff2", ".png": "image/png", ".txt": "text/plain", ".xml": "application/xml" };
 const server = createServer((req, res) => {
-  const clean = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  const requested = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  const clean = requested === "/marketing-olympus-academy" ? "/" : requested.startsWith("/marketing-olympus-academy/") ? requested.slice("/marketing-olympus-academy".length) : requested;
   let path = join(dist, clean.endsWith("/") ? `${clean}index.html` : clean);
   if (!existsSync(path) || statSync(path).isDirectory()) {
     if (existsSync(join(path, "index.html"))) path = join(path, "index.html");
@@ -45,7 +46,18 @@ const server = createServer((req, res) => {
 await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
 const base = `http://127.0.0.1:${server.address().port}`;
 
-const executablePath = existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : undefined;
+const executablePath = [
+  "/opt/pw-browsers/chromium",
+  "/usr/bin/google-chrome",
+  "/usr/bin/chromium",
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+].find((path) => existsSync(path));
+if (!executablePath) {
+  console.error("SMOKE FAILED: не найден Chromium, Chrome или Edge.");
+  server.close();
+  process.exit(1);
+}
 const browser = await chromium.launch({ executablePath, args: ["--no-sandbox"] });
 const page = await browser.newPage();
 const pageErrors = [];
@@ -110,6 +122,59 @@ if (swState.supported) {
   check((swState.cached || 0) >= 20, `Service worker: офлайн-кэш заполнен частично (${swState.cached || 0} записей)`);
 }
 
+// 7. Фундамент v2: слабая попытка получает замечания, исправление повышает балл,
+// защита обязательна, завершение и восстановление сохраняются.
+await page.goto(`${base}/`, { waitUntil: "load" });
+await page.evaluate(() => localStorage.clear());
+await page.reload({ waitUntil: "load" });
+await page.locator(".actions button.primary").click();
+await page.locator(".provocation .foundation-options button").nth(1).click();
+await page.locator(".reason-grid button").nth(0).click();
+await page.locator(".reason-grid button").nth(1).click();
+await page.locator(".lesson-stage .foundation-options").nth(1).locator("button").nth(2).click();
+await page.locator(".project-grid button").nth(2).click();
+await page.locator(".foundation-fields textarea").nth(0).fill("Еда для всех");
+await page.getByRole("button", { name: "Проверить ответ →" }).click();
+const weakScore = Number((await page.locator(".evaluation-head strong").textContent()).split("/")[0]);
+check(weakScore < 65, `Фундамент: слабый ответ получил завышенный балл ${weakScore}`);
+check((await page.locator(".feedback-grid article").nth(1).locator("li").count()) >= 1, "Фундамент: слабый ответ не получил конкретных замечаний");
+await page.getByRole("button", { name: "Подставить учебный старт →" }).click();
+await page.getByRole("button", { name: "Проверить ответ →" }).click();
+const strongScore = Number((await page.locator(".evaluation-head strong").textContent()).split("/")[0]);
+check(strongScore > weakScore, `Фундамент: исправление не повысило балл (${weakScore} → ${strongScore})`);
+check(await page.getByRole("button", { name: "Завершить урок →" }).isDisabled(), "Фундамент: урок можно завершить без защиты");
+await page.locator(".defense textarea").fill("Клиент не продолжит решать задачу готовкой, потому что после смены теряет 40 минут; защитная метрика — 90% заказов без опоздания.");
+await page.locator(".review-question .foundation-options button").nth(1).click();
+check(!(await page.getByRole("button", { name: "Завершить урок →" }).isDisabled()), "Фундамент: сильный ответ с защитой нельзя завершить");
+await page.getByRole("button", { name: "Завершить урок →" }).click();
+const savedFoundation = await page.evaluate(() => JSON.parse(localStorage.getItem("olymp-foundation-v2")));
+check(savedFoundation.lessons["marketing-basics-1"].status === "completed", "Фундамент: завершение урока не сохранено");
+await page.reload({ waitUntil: "load" });
+check((await page.locator(".ring span").textContent()) === "20%", "Фундамент: прогресс не восстановился после обновления");
+
+// 8. Адаптивность учебного интерфейса на обязательных размерах.
+for (const viewport of [{width:320,height:568},{width:375,height:812},{width:768,height:1024},{width:1440,height:900}]) {
+  await page.setViewportSize(viewport);
+  await page.goto(`${base}/`, { waitUntil: "load" });
+  await page.locator(".actions button.primary").click();
+  const overflow = await page.evaluate(() => {
+    const client = document.documentElement.clientWidth;
+    const offenders = [...document.querySelectorAll("*")]
+      .map((element) => ({
+        name: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${element.classList.length ? `.${[...element.classList].join(".")}` : ""}`,
+        left: Math.round(element.getBoundingClientRect().left),
+        right: Math.round(element.getBoundingClientRect().right),
+        width: Math.round(element.getBoundingClientRect().width),
+      }))
+      .filter((element) => element.right > client + 1 || element.left < -1)
+      .slice(0, 8);
+    return { client, scroll: document.documentElement.scrollWidth, offenders };
+  });
+  check(overflow.scroll <= overflow.client, `Фундамент: горизонтальный скролл ${overflow.scroll}px при ширине ${viewport.width}px (${overflow.offenders.map((item) => `${item.name}:${item.left}..${item.right}`).join(", ")})`);
+  check(await page.locator(".course-shell").isVisible(), `Фундамент: учебный экран недоступен при ${viewport.width}×${viewport.height}`);
+  await page.locator(".course-shell .back").click();
+}
+
 check(pageErrors.length === 0, `Ошибки JS на страницах: ${pageErrors.join("; ")}`);
 
 await browser.close();
@@ -120,4 +185,4 @@ if (errors.length) {
   errors.forEach((error) => console.error(`- ${error}`));
   process.exit(1);
 }
-console.log("Дымовой тест пройден: вёрстка аналитики, рубрика кейсов, страница 404 и офлайн-кэш работают.");
+console.log("Дымовой тест пройден: основные модули, фундамент v2, сохранение и четыре адаптивных размера работают.");

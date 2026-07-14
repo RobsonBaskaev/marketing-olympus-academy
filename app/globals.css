@@ -315,6 +315,8 @@ small:before {
   border-bottom: 1px solid var(--line);
 }
 .trackgrid > a {
+  box-sizing: border-box;
+  min-width: 0;
   padding: 26px 20px;
   min-height: 300px;
   border-right: 1px solid var(--line);
@@ -619,6 +621,9 @@ footer p {
   .trackgrid > a {
     min-height: 235px;
   }
+  .trackgrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quality-feedback {
@@ -786,3 +791,4 @@ footer p {
     bottom: -10px;
   }
 }
+.case-rubric-mini{margin:12px 0 18px;padding:14px;background:#f0eee7;display:grid;gap:8px}.case-rubric-mini span{display:flex;justify-content:space-between}.case-rubric-mini i{height:6px;background:#d2d0c9;overflow:hidden}.case-rubric-mini em{display:block;height:100%;background:#6657ef}.case-rubric-mini small{color:var(--muted);line-height:1.5}.case-rubric-mini a{color:#111820;font-weight:800;font-size:12px}

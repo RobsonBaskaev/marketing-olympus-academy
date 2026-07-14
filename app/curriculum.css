@@ -16,8 +16,9 @@
 .academic-rhythm { padding: 36px 6vw; background: #d9ff43; }
 .academic-rhythm > div { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; margin-top: 20px; }
 .academic-rhythm span { padding: 18px; border-left: 1px solid #9eaf38; font-weight: 800; font-size: 12px; }
-.curriculum-modules { max-width: 1250px; margin: 70px auto; padding: 0 4vw; }
+.curriculum-modules { box-sizing: border-box; max-width: 1250px; margin: 70px auto; padding: 0 4vw; }
 .curriculum-modules > article { display: grid; grid-template-columns: 130px 1fr 300px; border-top: 1px solid var(--line); padding: 40px 0; gap: 35px; }
+.curriculum-modules > article > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .module-index span { display: block; font-size: 38px; }
 .module-index small { color: var(--muted); }
 .module-syllabus h2 { font-size: 34px; margin-top: 0; }
@@ -43,4 +44,4 @@
 .academic-integrity li { margin: 13px 0; line-height: 1.55; }
 .academic-integrity a { display: inline-block; margin-top: 18px; color: var(--ink); font-weight: 800; }
 @media (max-width: 900px) { .academic-rhythm > div { grid-template-columns: 1fr; } .academic-rhythm span { border-left: 0; border-top: 1px solid #9eaf38; } .curriculum-modules > article { grid-template-columns: 80px 1fr; } .curriculum-modules aside { grid-column: 2; } .assessment-model > div { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 650px) { .course-outcomes ol, .level-paths { grid-template-columns: 1fr; } .curriculum-modules > article { grid-template-columns: 1fr; } .curriculum-modules aside { grid-column: auto; } .assessment-model > div { grid-template-columns: 1fr; } .curriculum-facts { gap: 25px; } }
+@media (max-width: 650px) { .course-outcomes ol, .level-paths { grid-template-columns: 1fr; } .curriculum-modules > article { grid-template-columns: 1fr; } .curriculum-modules aside { grid-column: auto; } .curriculum-modules ul { padding-left: 22px; } .assessment-model > div { grid-template-columns: 1fr; } .curriculum-facts { gap: 25px; } }

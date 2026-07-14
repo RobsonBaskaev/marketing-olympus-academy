@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
+import { completedCaseCount } from "../lib/case-progress.mjs";
 
 const parse = (key, fallback) => {
   try {
@@ -87,12 +87,10 @@ export default function Learn() {
         ? Object.values(acq.money).reduce((a, b) => a + Number(b || 0), 0)
         : 0,
       analyticsReady = Number(analytics.data?.sales || 0) > 0,
-      caseCount = Object.keys(caseLab.selected || {}).filter(
-        (id) => String(caseLab.drafts?.[id] || "").trim().length >= 80,
+      caseCount = Object.values(caseLab.drafts || {}).filter(
+        (draft) => String(draft || "").trim().length >= 80,
       ).length,
-      strongCaseCount = Object.keys(caseLab.drafts || {}).filter(
-        (id) => evaluateCaseAnswer(caseLab.drafts[id]).ready && evaluateCaseAnswer(caseLab.drafts[id]).score >= 4,
-      ).length,
+      strongCaseCount = completedCaseCount(caseLab),
       capCount = [
         cap.summary?.length >= 180,
         cap.risk?.length >= 80,
