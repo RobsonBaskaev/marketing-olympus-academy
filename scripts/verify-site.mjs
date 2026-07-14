@@ -111,6 +111,11 @@ const sitemap = readFileSync(join(dist, "sitemap.xml"), "utf8");
 if (sitemap.includes("/backup/")) errors.push("sitemap.xml: техническая noindex-страница backup не должна индексироваться");
 
 const mainSource = readFileSync(join(root, "app", "page.js"), "utf8");
+const foundationSource = readFileSync(join(root, "app", "foundation-trainer.js"), "utf8");
+const foundationCurriculumSource = readFileSync(join(root, "app", "lib", "foundation-curriculum.mjs"), "utf8");
+const foundationEvaluationSource = readFileSync(join(root, "app", "lib", "foundation-evaluation.mjs"), "utf8");
+const foundationStorageSource = readFileSync(join(root, "app", "lib", "foundation-storage.mjs"), "utf8");
+const foundationDocumentSource = readFileSync(join(root, "app", "lib", "foundation-document.mjs"), "utf8");
 const accessibilityCss = readFileSync(join(root, "app", "accessibility.css"), "utf8");
 const caseLabSource = readFileSync(join(root, "app", "cases", "case-lab.js"), "utf8");
 const backupSource = readFileSync(join(root, "app", "backup", "page.js"), "utf8");
@@ -178,6 +183,22 @@ if (!backupSource.includes('"olymp-case-lab"')) {
 }
 if (!backupSource.includes('"olymp-diagnostic"')) {
   errors.push("Резервная копия: не включён результат диагностики");
+}
+for (const marker of ["ПРОВОКАЦИЯ", "НЕ ПУТАЙ", "МИНИ-КЕЙС", "ЗАЩИТА РЕШЕНИЯ", "ОДНА МЫСЛЬ", "Проверить ответ", "Исправить ответ"]) {
+  if (!foundationSource.includes(marker)) errors.push(`Фундамент v2: отсутствует этап ${marker}`);
+}
+for (const marker of ["marketing-basics-1", "marketing-basics-2", "marketing-basics-3", "marketing-basics-4", "marketing-basics-5"]) {
+  if (!foundationCurriculumSource.includes(marker)) errors.push(`Фундамент v2: отсутствует урок ${marker}`);
+}
+for (const marker of ["vagueWords", "crossLessonCheck", "readyToComplete", "threshold"]) {
+  if (!foundationEvaluationSource.includes(marker)) errors.push(`Фундамент v2: отсутствует проверка ${marker}`);
+}
+for (const marker of ["migrateFoundation", "wasPreviouslyMarkedComplete", "olymp-answers", "olymp-progress"]) {
+  if (!foundationStorageSource.includes(marker)) errors.push(`Фундамент v2: отсутствует миграция ${marker}`);
+}
+if (!backupSource.includes('"olymp-foundation-v2"')) errors.push("Резервная копия: не включён фундамент v2");
+for (const marker of ["МАРКЕТИНГОВЫЙ ФУНДАМЕНТ ПРОЕКТА", "ТРИ СЕГМЕНТА", "ПОЗИЦИОНИРОВАНИЕ", "РИСКИ И СЛАБЫЕ МЕСТА", "ready:summary.ready"]) {
+  if (!foundationDocumentSource.includes(marker)) errors.push(`Итоговый фундамент: отсутствует ${marker}`);
 }
 for (const [label, source] of [["Учебный кабинет", learnSource], ["Выпускное досье", olympusSource]]) {
   if (!source.includes('"olymp-case-lab"') || !source.includes("caseCount")) {
@@ -249,8 +270,8 @@ if (!notFoundSource.includes("github.io")) {
 if (!analyticsSource.includes("Math.min(100")) {
   errors.push("Аналитика: ширина баров воронки должна быть ограничена сверху (Math.min)");
 }
-if (!caseLabSource.includes("evaluateCaseAnswer") || !caseLabSource.includes('href="../review/"')) {
-  errors.push("Практикум кейсов: нужна рубрика evaluateCaseAnswer и ссылка на детальный разбор /review/");
+if (!caseLabSource.includes("caseWorkStatus") || !caseLabSource.includes('href="../review/"')) {
+  errors.push("Практикум кейсов: нужна единая рубрика caseWorkStatus и ссылка на детальный разбор /review/");
 }
 const globalsCss = readFileSync(join(root, "app", "globals.css"), "utf8");
 if (globalsCss.includes("fonts.googleapis.com") || !globalsCss.includes("@font-face")) {

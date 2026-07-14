@@ -5,6 +5,9 @@ import {
   nextIncompleteLesson,
   reconcileCompletedLessons,
 } from "./lib/lesson-progress.mjs";
+import FoundationTrainer from "./foundation-trainer";
+import {foundationCompletedIndexes,loadFoundation} from "./lib/foundation-storage.mjs";
+import {buildFoundationDocument} from "./lib/foundation-document.mjs";
 
 const lessons = [
   {
@@ -420,23 +423,16 @@ function AnswerCoach() {
   );
 }
 
-function Portfolio({ notes }) {
-  const works = Object.entries(notes).filter(([, v]) => v?.trim());
+function Portfolio({ notes, done }) {
   const download = () => {
-    const content = [
-        "МАРКЕТИНГ ОЛИМП — УЧЕБНОЕ ПОРТФОЛИО",
-        "",
-        ...works.flatMap(([i, v]) => [
-          `${Number(i) + 1}. ${lessons[i]?.title || "Работа"}`,
-          v,
-          "",
-        ]),
-      ].join("\n"),
+    const foundationData = loadFoundation(localStorage).state,
+      foundationDocument = buildFoundationDocument(foundationData),
+      content = foundationDocument.text,
       blob = new Blob([content], { type: "text/plain;charset=utf-8" }),
       url = URL.createObjectURL(blob),
       a = document.createElement("a");
     a.href = url;
-    a.download = "marketing-portfolio.txt";
+    a.download = "marketing-foundation.txt";
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -454,27 +450,28 @@ function Portfolio({ notes }) {
       </div>
       <div className="portfolio-board">
         <div className="portfolio-status">
-          <strong>{works.length}/5</strong>
-          <span>работ сохранено</span>
+          <strong>{done.length}/5</strong>
+          <span>уроков подтверждено качеством</span>
           <div className="mini-progress">
-            <i style={{ width: `${(works.length / 5) * 100}%` }} />
+            <i style={{ width: `${(done.length / 5) * 100}%` }} />
           </div>
           <button
             className="primary"
-            disabled={!works.length}
+            disabled={done.length < 5}
             onClick={download}
           >
-            Скачать портфолио ↓
+            Скачать маркетинговый фундамент ↓
           </button>
+          {done.length < 5 && <small>Завершённый документ откроется после пяти проверенных уроков.</small>}
         </div>
         <div className="work-list">
           {lessons.map((x, i) => (
-            <article key={x.title} className={notes[i] ? "ready" : ""}>
-              <span>{notes[i] ? "✓" : "○"}</span>
+            <article key={x.title} className={done.includes(i) ? "ready" : ""}>
+              <span>{done.includes(i) ? "✓" : "○"}</span>
               <div>
                 <b>{x.title}</b>
                 <p>
-                  {notes[i]
+                  {done.includes(i) && notes[i]
                     ? notes[i].slice(0, 120) +
                       (notes[i].length > 120 ? "…" : "")
                     : "Выполните задание урока, чтобы добавить работу."}
@@ -493,6 +490,7 @@ function LessonContent({
   done,
   notes,
   mode,
+  onMode,
   error,
   onNote,
   onFinish,
@@ -500,6 +498,9 @@ function LessonContent({
   setQuiz,
   answers,
   setAnswers,
+  onFoundationCompleted,
+  onFoundationNext,
+  onProgressReset,
 }) {
   const item = lessons[lesson],
     score = answers.reduce((n, a, i) => n + (a === test[i]?.c ? 1 : 0), 0),
@@ -548,51 +549,7 @@ function LessonContent({
         </div>
       </div>
     );
-  return (
-    <>
-      <div className="lesson-meta">
-        <span>УРОК {lesson + 1} ИЗ 5</span>
-        <span>{item.time}</span>
-      </div>
-      <h1>{item.title}</h1>
-      <p className="lesson-lead">{item.text}</p>
-      <div className="keybox">
-        <b>Главное</b>
-        {item.points.map((x) => (
-          <p key={x}>✓ {x}</p>
-        ))}
-      </div>
-      <div className="worked-example">
-        <small>РАЗОБРАННЫЙ ПРИМЕР</small>
-        <p>{examples[lesson]}</p>
-        <b>Формула ответа</b>
-        <p>Кто клиент → ситуация → задача → результат → доказательство.</p>
-      </div>
-      <div className="workbox">
-        <small>ПРАКТИЧЕСКОЕ ЗАДАНИЕ</small>
-        <h3>{item.task}</h3>
-        {mode === "beginner" && (
-          <div className="answer-template">
-            <b>Ответьте по шагам</b>
-            <span>1. Кто клиент?</span>
-            <span>2. В какой он ситуации?</span>
-            <span>3. Какой результат ему нужен?</span>
-            <span>4. Чем это подтвердить?</span>
-          </div>
-        )}
-        <textarea
-          value={notes[lesson] || ""}
-          onChange={(e) => onNote(e.target.value)}
-          placeholder="Запишите ответ здесь…"
-        />
-        <p className="autosave">✓ Ответ сохраняется автоматически</p>
-        {error && <p className="validation-error">{error}</p>}
-      </div>
-      <button className="primary complete" onClick={onFinish}>
-        {done.includes(lesson) ? "Обновить и продолжить →" : "Завершить урок →"}
-      </button>
-    </>
-  );
+  return <FoundationTrainer lessonIndex={lesson} mode={mode} onMode={onMode} onCompleted={onFoundationCompleted} onNext={onFoundationNext} onProgressReset={onProgressReset}/>;
 }
 
 export default function Page() {
@@ -614,17 +571,19 @@ export default function Page() {
         savedNotes = JSON.parse(
           localStorage.getItem("olymp-answers") || "{}",
         ),
-        validDone = reconcileCompletedLessons(
+        legacyValidDone = reconcileCompletedLessons(
           savedDone,
           savedNotes,
           lessons.length,
-        );
+        ),
+        foundationData = loadFoundation(localStorage),
+        validDone = foundationCompletedIndexes(foundationData.state);
       setDone(validDone);
       setNotes(savedNotes);
-      if (JSON.stringify(validDone) !== JSON.stringify(savedDone)) {
+      if (JSON.stringify(validDone) !== JSON.stringify(savedDone) || JSON.stringify(legacyValidDone) !== JSON.stringify(savedDone)) {
         localStorage.setItem("olymp-progress", JSON.stringify(validDone));
       }
-      setMode(localStorage.getItem("olymp-mode") || "beginner");
+      setMode(foundationData.state.difficulty || localStorage.getItem("olymp-mode") || "beginner");
     } catch {}
   }, []);
   useEffect(() => {
@@ -689,6 +648,24 @@ export default function Page() {
   const chooseMode = (value) => {
     setMode(value);
     localStorage.setItem("olymp-mode", value);
+  };
+  const completeFoundationLesson = (index, summary) => {
+    const nextNotes = { ...notes, [index]: summary };
+    const nextDone = done.includes(index) ? done : [...done, index].sort((a, b) => a - b);
+    setNotes(nextNotes);
+    setDone(nextDone);
+    try {
+      localStorage.setItem("olymp-answers", JSON.stringify(nextNotes));
+      localStorage.setItem("olymp-progress", JSON.stringify(nextDone));
+    } catch {}
+  };
+  const advanceFoundationLesson = () => {
+    if (lesson < lessons.length - 1) setLesson(lesson + 1);
+    else setQuiz(0);
+  };
+  const resetFoundationProgress = () => {
+    setDone([]);
+    try { localStorage.setItem("olymp-progress", "[]"); } catch {}
   };
   const openRecommendedLesson = () => {
     setLesson(nextIncompleteLesson(done, lessons.length));
@@ -877,7 +854,7 @@ export default function Page() {
       <LearningSetup mode={mode} onMode={chooseMode} notes={notes} />
       <CaseTrainer />
       <AnswerCoach />
-      <Portfolio notes={notes} />
+      <Portfolio notes={notes} done={done} />
       <footer>
         <div className="brand">
           <span>М</span> МАРКЕТИНГ <i>ОЛИМП</i>
@@ -957,6 +934,7 @@ export default function Page() {
               done={done}
               notes={notes}
               mode={mode}
+              onMode={chooseMode}
               error={error}
               onNote={updateNote}
               onFinish={finish}
@@ -964,6 +942,9 @@ export default function Page() {
               setQuiz={setQuiz}
               answers={answers}
               setAnswers={setAnswers}
+              onFoundationCompleted={completeFoundationLesson}
+              onFoundationNext={advanceFoundationLesson}
+              onProgressReset={resetFoundationProgress}
             />
           </section>
         </div>

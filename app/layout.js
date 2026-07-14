@@ -7,6 +7,7 @@ import "./portfolio.css";
 import "./accessibility.css";
 import "./resources.css";
 import "./lesson-enhance.css";
+import "./foundation.css";
 import "./trust.css";
 import "./research.css";
 import "./strategy.css";
