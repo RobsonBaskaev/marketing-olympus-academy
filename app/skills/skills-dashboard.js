@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
+import { completedCaseCount } from "../lib/case-progress.mjs";
 
 const read = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key) || "null") || fallback; }
@@ -20,8 +20,8 @@ export default function SkillsDashboard() {
       strategyChoices = (strategy.answers || []).filter((v) => v !== null && v !== undefined).length,
       budget = acquisition.money ? Object.values(acquisition.money).reduce((sum, v) => sum + Number(v || 0), 0) : 0,
       analyticsReady = Number(analytics.data?.sales || 0) > 0,
-      writtenCases = Object.keys(caseLab.drafts || {}).filter((id) => evaluateCaseAnswer(caseLab.drafts[id]).ready).length,
-      strongCases = Object.keys(caseLab.drafts || {}).filter((id) => evaluateCaseAnswer(caseLab.drafts[id]).ready && evaluateCaseAnswer(caseLab.drafts[id]).score >= 4).length,
+      writtenCases = Object.values(caseLab.drafts || {}).filter((draft) => String(draft || "").trim().length >= 80).length,
+      strongCases = completedCaseCount(caseLab),
       capstoneCount = [capstone.summary?.length >= 180, capstone.risk?.length >= 80, capstone.experiment?.length >= 120].filter(Boolean).length;
     setSkills([
       { name: "Клиент и проблема", score: answerCount >= 3 ? 2 : answerCount ? 1 : 0, evidence: `${answerCount}/5 учебных работ`, next: "Опишите клиента, его задачу и наблюдаемый барьер.", href: "../#module" },

@@ -170,7 +170,7 @@ if (!/button\s*\{[^}]*min-height:\s*44px/s.test(accessibilityCss)) {
 if (!/\.actions a\.primary\s*\{[^}]*color:\s*white/s.test(readFileSync(join(root, "app", "globals.css"), "utf8"))) {
   errors.push("Главная: текст основной ссылки hero не контрастен");
 }
-for (const marker of ["Новичок", "Начинающий", "Уверенный", "Профессионал", "olymp-case-lab", "strong-answer"]) {
+for (const marker of ["Новичок", "Начинающий", "Уверенный", "Профессионал", "olymp-case-lab", "strong-answer", "caseWorkStatus", "case-rubric-mini"]) {
   if (!caseLabSource.includes(marker)) errors.push(`Практикум кейсов: отсутствует ${marker}`);
 }
 if (!backupSource.includes('"olymp-case-lab"')) {
@@ -199,7 +199,7 @@ for (const marker of ["Карта компетенций", "Подтвержде
 for (const marker of ["Разбор вашего решения", "Данные и наблюдение", "Проверяемая гипотеза", "Риск или ограничение", "не является оценкой квалификации", "olymp-case-lab"]) {
   if (!reviewSource.includes(marker) && !caseRubricSource.includes(marker)) errors.push(`Разбор кейсов: отсутствует ${marker}`);
 }
-if (!learnSource.includes("evaluateCaseAnswer") || !olympusSource.includes("evaluateCaseAnswer") || !skillsSource.includes("evaluateCaseAnswer")) {
+if (!learnSource.includes("completedCaseCount") || !olympusSource.includes("completedCaseCount") || !skillsSource.includes("completedCaseCount")) {
   errors.push("Единая рубрика кейсов не используется во всех отчётах прогресса");
 }
 for (const marker of ["olymp-profile", "ПЛАН НА 4 НЕДЕЛИ", "Начать карьеру", "Развивать свой бизнес", "Обучать команду"]) {

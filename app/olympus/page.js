@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
+import { completedCaseCount } from "../lib/case-progress.mjs";
 
 const safeParse = (key, fallback) => {
   try {
@@ -56,12 +56,10 @@ export default function Olympus() {
       ) === 300000,
     analyticsReady =
       artifacts.analytics.data && Number(artifacts.analytics.data.sales) > 0,
-    caseCount = Object.keys(artifacts.caseLab.selected || {}).filter(
-      (id) => String(artifacts.caseLab.drafts?.[id] || "").trim().length >= 80,
+    caseCount = Object.values(artifacts.caseLab.drafts || {}).filter(
+      (draft) => String(draft || "").trim().length >= 80,
     ).length,
-    strongCaseCount = Object.keys(artifacts.caseLab.drafts || {}).filter(
-      (id) => evaluateCaseAnswer(artifacts.caseLab.drafts[id]).ready && evaluateCaseAnswer(artifacts.caseLab.drafts[id]).score >= 4,
-    ).length;
+    strongCaseCount = completedCaseCount(artifacts.caseLab);
   const modules = [
       {
         n: "01",
