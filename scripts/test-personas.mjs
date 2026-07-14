@@ -26,7 +26,8 @@ const mime = {
 };
 
 const server = createServer((request, response) => {
-  const clean = decodeURIComponent(new URL(request.url, "http://x").pathname);
+  const requested = decodeURIComponent(new URL(request.url, "http://x").pathname);
+  const clean = requested === "/marketing-olympus-academy" ? "/" : requested.startsWith("/marketing-olympus-academy/") ? requested.slice("/marketing-olympus-academy".length) : requested;
   let path = join(dist, clean.endsWith("/") ? `${clean}index.html` : clean);
   if (!existsSync(path) || statSync(path).isDirectory()) {
     if (existsSync(join(path, "index.html"))) path = join(path, "index.html");

@@ -29,7 +29,8 @@ try {
 
 const mime = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript", ".svg": "image/svg+xml", ".json": "application/json", ".webmanifest": "application/manifest+json", ".woff2": "font/woff2", ".png": "image/png", ".txt": "text/plain", ".xml": "application/xml" };
 const server = createServer((req, res) => {
-  const clean = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  const requested = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  const clean = requested === "/marketing-olympus-academy" ? "/" : requested.startsWith("/marketing-olympus-academy/") ? requested.slice("/marketing-olympus-academy".length) : requested;
   let path = join(dist, clean.endsWith("/") ? `${clean}index.html` : clean);
   if (!existsSync(path) || statSync(path).isDirectory()) {
     if (existsSync(join(path, "index.html"))) path = join(path, "index.html");
