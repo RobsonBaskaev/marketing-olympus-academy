@@ -776,6 +776,9 @@ export default function Page() {
           <a href="#module" onClick={() => setMenuOpen(false)}>Первый модуль</a>
           <a href="#program" onClick={() => setMenuOpen(false)}>Программа</a>
           <a href="#practice" onClick={() => setMenuOpen(false)}>Практика</a>
+          <a href="diagnostic/" onClick={() => setMenuOpen(false)}>Диагностика</a>
+          <a href="library/" onClick={() => setMenuOpen(false)}>Библиотека</a>
+          <a href="pro/" onClick={() => setMenuOpen(false)}>Pro</a>
         </div>
         <div className="nav-actions">
           <a className="ghost" href="learn/">
@@ -837,6 +840,38 @@ export default function Page() {
           </span>
           <b>1</b>
         </div>
+      </section>
+      <section className="quick-nav" aria-label="Быстрый доступ к разделам">
+        <a href="diagnostic/">
+          <b>Диагностика уровня</b>
+          <span>3 мини-кейса · 5 минут</span>
+          <i>→</i>
+        </a>
+        <a href="start/">
+          <b>Персональный план</b>
+          <span>Маршрут на 4 недели под вашу цель</span>
+          <i>→</i>
+        </a>
+        <a href="learn/">
+          <b>Учебный кабинет</b>
+          <span>Весь прогресс на одном экране</span>
+          <i>→</i>
+        </a>
+        <a href="library/">
+          <b>Библиотека методов</b>
+          <span>28 инструментов с примерами</span>
+          <i>→</i>
+        </a>
+        <a href="business-diagnostic/">
+          <b>Диагностика бизнеса</b>
+          <span>28 черновиков под ваш проект</span>
+          <i>→</i>
+        </a>
+        <a href="pro/">
+          <b>Олимп Pro</b>
+          <span>Ранний доступ к расширенной версии</span>
+          <i>→</i>
+        </a>
       </section>
       <section className="manifesto">
         <p>ПЕРВЫЙ УЧЕБНЫЙ РЕЗУЛЬТАТ</p>
