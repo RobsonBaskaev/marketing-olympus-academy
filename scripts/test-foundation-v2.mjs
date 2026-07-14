@@ -21,6 +21,18 @@ assert.equal(strong.readyToComplete,true,"Сильный ответ с мини-
 assert.equal(evaluateFoundationLesson(0,{answers:strongAnswers,defenseAnswer:"",...stages},base).readyToComplete,false,"Защита обязательна");
 assert.equal(evaluateFoundationLesson(0,{answers:strongAnswers,defenseAnswer:"Клиент не продолжит готовить сам, потому что после смены теряет 40 минут, а сервис подтверждает срок долей заказов без опозданий.",...stages,comparisonReasons:[0]},base).readyToComplete,false,"Сравнение слабого и сильного ответа обязательно");
 
+const linkedFoundation={...base,lessons:{[foundationLessons[0].id]:{status:"completed",answers:strongAnswers}}};
+const linkedMarket=evaluateFoundationLesson(1,{answers:{group:"Родитель после смены, которому нужно накормить семью горячим ужином",demandSituation:"После 21:00 дома нет готовой еды",frequency:"Три раза в неделю",alternatives:"Самостоятельная готовка или агрегатор",friction:"Готовка занимает 40 минут",willingness:"Платит 2000 рублей в неделю",marketEvidence:"Провести 15 интервью"}},linkedFoundation);
+const unrelatedMarket=evaluateFoundationLesson(1,{answers:{group:"Владельцы автомобилей, которым нужен срочный ремонт"}},linkedFoundation);
+assert.ok(!linkedMarket.issues.some(issue=>issue.includes("не связано с задачей клиента")),"Общие слова задачи должны связывать соседние уроки");
+assert.ok(unrelatedMarket.issues.some(issue=>issue.includes("не связано с задачей клиента")),"Несвязанный рынок должен распознаваться");
+const segmentationFoundation={...base,lessons:{[foundationLessons[1].id]:{status:"completed",answers:{}}}};
+const prioritySegment="Родители после поздней смены с детьми младше семи лет";
+const validPriority=evaluateFoundationLesson(2,{answers:{segment1:prioritySegment,segment2:"Семьи с двумя работающими родителями и регулярным заказом",segment3:"Родители с нерегулярным графиком рабочих смен",priority:prioritySegment}},segmentationFoundation);
+const copiedSegments=evaluateFoundationLesson(2,{answers:{segment1:prioritySegment,segment2:prioritySegment,segment3:"Родители с нерегулярным графиком рабочих смен",priority:prioritySegment}},segmentationFoundation);
+assert.ok(!validPriority.issues.some(issue=>issue.includes("одинаковый ответ")),"Выбранный сегмент можно дословно перенести в приоритет");
+assert.ok(copiedSegments.issues.some(issue=>issue.includes("одинаковый ответ")),"Копирование одного ответа в несколько сегментов должно блокироваться");
+
 const migrated=migrateFoundation({0:"Старый содержательный ответ пользователя о клиенте и его задаче."},[0],"pro");
 assert.equal(migrated.difficulty,"pro");
 assert.equal(migrated.lessons[foundationLessons[0].id].status,"migrated","Старый прогресс нельзя выдавать за завершение по новым правилам");

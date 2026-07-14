@@ -22,7 +22,7 @@ function tagQuality(lesson,answers,tag,difficulty){
 }
 
 function overlap(left,right){
-  const a=new Set(words(left)),b=words(right);
+  const a=new Set(words(left)),b=new Set(words(right));
   if(!a.size||!b.size) return false;
   return [...a].some(word=>b.has(word));
 }
@@ -49,7 +49,12 @@ export function evaluateFoundationLesson(index,lessonState={},foundation={}){
   const answers=lessonState.answers||{},defense=clean(lessonState.defenseAnswer),proChallenge=clean(lessonState.proChallenge),values=lesson.fields.map(field=>clean(answers[field.key]));
   const missing=lesson.fields.filter(field=>clean(answers[field.key]).length<fieldMinimum(field,difficulty));
   const answeredRatio=(lesson.fields.length-missing.length)/lesson.fields.length;
-  const duplicates=values.filter(value=>value.length>=12&&values.filter(other=>normalized(other)===normalized(value)).length>1);
+  const duplicateGroups=Object.values(lesson.fields.reduce((groups,field)=>{
+    const value=clean(answers[field.key]),key=normalized(value);
+    if(value.length>=12)(groups[key]||=[]).push(field.key);
+    return groups;
+  },{})).filter(keys=>keys.length>1);
+  const duplicates=duplicateGroups.filter(keys=>!(index===2&&keys.length===2&&keys.includes("priority")&&keys.some(key=>["segment1","segment2","segment3"].includes(key))));
   const vague=[...new Set(lesson.fields.flatMap(field=>{
     const value=clean(answers[field.key]),found=vagueWords.filter(word=>value.toLowerCase().includes(word));
     return found.length&&!hasNumber(value)&&value.length<90?found:[];
