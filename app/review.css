@@ -32,3 +32,4 @@
 .case-review-link { position: fixed; right: 20px; bottom: 20px; z-index: 10; padding: 14px 18px; background: #d9ff43; color: #111820; font-weight: 800; box-shadow: 0 8px 30px #0003; }
 @media (max-width: 850px) { .review-tabs { grid-template-columns: 1fr 1fr; } .review-summary, .review-layout { margin-left: 20px; margin-right: 20px; } .review-layout { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .review-tabs { grid-template-columns: 1fr; } .review-summary { grid-template-columns: 1fr; } .case-review-link { left: 20px; text-align: center; } }
+.review-answer{max-width:1100px;margin:0 auto;padding:0 6vw 10px}.review-answer small:before{border-color:var(--ink)}.review-answer blockquote{margin:12px 0 0;padding:20px 24px;background:white;border-left:4px solid #d9ff43;line-height:1.7;color:#3a444e;font-size:14px;white-space:pre-wrap}

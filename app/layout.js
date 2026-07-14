@@ -37,7 +37,16 @@ export const metadata = {
     url: "https://robsonbaskaev.github.io/marketing-olympus-academy/",
     siteName: "Маркетинг Олимп",
     locale: "ru_RU",
-    type: "website"
+    type: "website",
+    images: [{ url: "https://robsonbaskaev.github.io/marketing-olympus-academy/og.png", width: 1200, height: 630, alt: "Маркетинг Олимп — тренажёр системного маркетинга" }]
+  },
+  twitter: { card: "summary_large_image", title: "Маркетинг Олимп — тренажёр системного маркетинга", description: "Учитесь решать маркетинговые задачи на практике и собирайте портфолио.", images: ["https://robsonbaskaev.github.io/marketing-olympus-academy/og.png"] },
+  icons: {
+    icon: [
+      { url: "/marketing-olympus-academy/icon.svg", type: "image/svg+xml" },
+      { url: "/marketing-olympus-academy/icon-192.png", sizes: "192x192", type: "image/png" }
+    ],
+    apple: "/marketing-olympus-academy/apple-touch-icon.png"
   },
   manifest: "/marketing-olympus-academy/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Маркетинг Олимп", statusBarStyle: "black-translucent" }

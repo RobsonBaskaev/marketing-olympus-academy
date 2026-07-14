@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { evaluateCaseAnswer } from "../lib/case-rubric.mjs";
+import { evaluateOverallProgress } from "../lib/progress-rules.mjs";
 
 const parse = (key, fallback) => {
   try {
@@ -64,62 +64,40 @@ export default function Learn() {
     profile: null,
   });
   useEffect(() => {
-    const notes = parse("olymp-answers", {}),
-      research = parse("olymp-research", {}),
-      strategy = parse("olymp-strategy", {}),
-      acq = parse("olymp-acquisition", {}),
-      analytics = parse("olymp-analytics", {}),
-      caseLab = parse("olymp-case-lab", { selected: {}, drafts: {} }),
+    // Единые правила прогресса: кабинет, карта компетенций и «Олимп»
+    // используют app/lib/progress-rules.mjs без дублирования условий.
+    const overall = evaluateOverallProgress({
+        progress: parse("olymp-progress", []),
+        answers: parse("olymp-answers", {}),
+        quiz: parse("olymp-quiz", null),
+        research: parse("olymp-research", {}),
+        strategy: parse("olymp-strategy", {}),
+        acquisition: parse("olymp-acquisition", {}),
+        analytics: parse("olymp-analytics", {}),
+        caseLab: parse("olymp-case-lab", { selected: {}, drafts: {} }),
+        capstone: parse("olymp-capstone", {}),
+      }),
       diagnostic = parse("olymp-diagnostic", null),
       diagnosticHistory = parse("olymp-diagnostic-history", []),
       profile = parse("olymp-profile", null),
-      cap = parse("olymp-capstone", {}),
-      noteCount = Object.values(notes).filter(
-        (v) => String(v || "").length >= 30,
-      ).length,
-      researchCount = Object.values(research).filter(
-        (v) => String(v || "").length > 15,
-      ).length,
-      strategyCount = (strategy.answers || []).filter(
-        (v) => v !== null && v !== undefined,
-      ).length,
-      acqBudget = acq.money
-        ? Object.values(acq.money).reduce((a, b) => a + Number(b || 0), 0)
-        : 0,
-      analyticsReady = Number(analytics.data?.sales || 0) > 0,
-      caseCount = Object.keys(caseLab.selected || {}).filter(
-        (id) => String(caseLab.drafts?.[id] || "").trim().length >= 80,
-      ).length,
-      strongCaseCount = Object.keys(caseLab.drafts || {}).filter(
-        (id) => evaluateCaseAnswer(caseLab.drafts[id]).ready && evaluateCaseAnswer(caseLab.drafts[id]).score >= 4,
-      ).length,
-      capCount = [
-        cap.summary?.length >= 180,
-        cap.risk?.length >= 80,
-        cap.experiment?.length >= 120,
-      ].filter(Boolean).length;
+      order = [
+        "foundation",
+        "research",
+        "strategy",
+        "acquisition",
+        "analytics",
+        "cases",
+        "capstone",
+      ],
+      summary = (module) => {
+        const caseCount = module.details[0]?.detail || "";
+        const base = `${module.score}/${module.maxScore} требований`;
+        return caseCount ? `${caseCount} · ${base}` : base;
+      };
     setState({
       loaded: true,
-      ready: [
-        noteCount >= 3,
-        researchCount >= 6,
-        strategyCount === 4,
-        acqBudget === 300000,
-        analyticsReady,
-        strongCaseCount >= 1,
-        capCount === 3,
-      ],
-      details: [
-        `${noteCount}/5 работ`,
-        `${researchCount}/8 полей`,
-        `${strategyCount}/4 решений`,
-        acqBudget
-          ? `${acqBudget.toLocaleString("ru-RU")} ₽ распределено`
-          : "Нет медиаплана",
-        analyticsReady ? "Воронка сохранена" : "Нет данных",
-        `${strongCaseCount}/4 кейса подтверждено структурой · ${caseCount}/4 написано`,
-        `${capCount}/3 ответов защиты`,
-      ],
+      ready: order.map((key) => overall.modules[key].completed),
+      details: order.map((key) => summary(overall.modules[key])),
       diagnostic:
         diagnostic?.finished && Number.isFinite(Number(diagnostic.score))
           ? diagnostic
